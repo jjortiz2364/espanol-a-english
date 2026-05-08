@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="InglésYa!">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>InglésYa!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Righteous&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0f1a;--surface:#1a1a2e;--surface2:#252545;--surface3:#2d2d55;
+  --accent:#7c6af7;--accent2:#f72585;--accent3:#4cc9f0;--accent4:#06d6a0;
+  --gold:#ffd166;--text:#f0f0ff;--text2:#a0a0c0;--text3:#6060a0;
+  --border:rgba(124,106,247,0.2);--radius:16px;
+  --font:'Nunito',sans-serif;--display:'Righteous',cursive;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;flex-direction:column}
+#app{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:70px;-webkit-overflow-scrolling:touch}
+.screen{display:none}
+.screen.active{display:block}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 env(safe-area-inset-bottom,12px);z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text2);font-size:10px;font-family:var(--font);cursor:pointer;padding:4px 20px;border-radius:10px;transition:all .2s;touch-action:manipulation}
+.nav-btn i{font-size:22px}
+.nav-btn.active{color:var(--accent)}
+
+/* ── HOME ── */
+.hero{background:linear-gradient(135deg,#1a1a2e,#252545);padding:28px 20px 20px;position:relative;overflow:hidden}
+.hero-glow1{position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,106,247,.3),transparent 70%);pointer-events:none}
+.hero-glow2{position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(76,201,240,.2),transparent 70%);pointer-events:none}
+.app-title{font-family:var(--display);font-size:28px;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.app-subtitle{color:var(--text2);font-size:13px;margin-top:2px}
+.stats-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.stat-pill{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:50px;padding:6px 14px;font-size:12px;display:flex;align-items:center;gap:6px;color:var(--text2)}
+.stat-pill b{color:var(--text);font-size:14px}
+.stat-pill.gold b{color:var(--gold)}
+.stat-pill.green b{color:var(--accent4)}
+.streak-banner{margin:12px 16px;background:linear-gradient(135deg,rgba(255,209,102,.08),rgba(255,140,0,.04));border:1px solid rgba(255,209,102,.2);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.streak-fire{font-size:32px}
+.streak-num{font-size:22px;font-weight:900;color:var(--gold)}
+.streak-label{font-size:12px;color:var(--text2)}
+.section-title{padding:20px 20px 10px;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase}
+.game-cards{display:flex;flex-direction:column;gap:12px;padding:0 16px 8px}
+.game-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;touch-action:manipulation}
+.game-card:active{transform:scale(.97);background:var(--surface2)}
+.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.game-card.flash::before{background:linear-gradient(90deg,var(--accent),#a78ef7)}
+.game-card.fill::before{background:linear-gradient(90deg,var(--accent2),#ff6db2)}
+.game-card.scramble::before{background:linear-gradient(90deg,var(--accent3),#80dfff)}
+.card-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.card-icon.flash{background:rgba(124,106,247,.15)}
+.card-icon.fill{background:rgba(247,37,133,.15)}
+.card-icon.scramble{background:rgba(76,201,240,.15)}
+.card-body{flex:1;min-width:0}
+.card-title{font-weight:800;font-size:15px;margin-bottom:3px}
+.card-desc{font-size:12px;color:var(--text2);line-height:1.4}
+.card-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.card-badge{border-radius:50px;font-size:10px;font-weight:700;padding:2px 8px;display:inline-block}
+.badge-gold{background:rgba(255,209,102,.1);color:var(--gold);border:1px solid rgba(255,209,102,.25)}
+.badge-words{background:rgba(6,214,160,.08);color:var(--accent4);border:1px solid rgba(6,214,160,.2)}
+.card-arrow{color:var(--text3);font-size:14px;flex-shrink:0}
+
+/* ── GAME SHELL ── */
+.game-header{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:10}
+.back-btn{background:var(--surface2);border:none;color:var(--text);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
+.game-mode-title{font-weight:800;font-size:15px;flex:1}
+.xp-badge{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.3);color:var(--accent4);border-radius:50px;padding:4px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+.prog-wrap{padding:10px 16px}
+.prog-track{background:var(--surface2);border-radius:50px;height:6px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:50px;transition:width .4s ease}
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px}
+.q-area{padding:12px 16px 8px}
+.q-prompt{color:var(--text2);font-size:13px;margin-bottom:6px}
+.q-word{font-family:var(--display);font-size:32px;color:var(--text);line-height:1.2}
+.q-hint{color:var(--text3);font-size:12px;font-style:italic;margin-top:4px}
+
+/* ── FLASHCARD ── */
+.fc-wrap{padding:0 16px;perspective:1000px}
+.flashcard{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 20px;text-align:center;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .45s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;position:relative;touch-action:manipulation}
+.flashcard.flipped{transform:rotateY(180deg)}
+.card-front,.card-back{backface-visibility:hidden;-webkit-backface-visibility:hidden;width:100%}
+.card-back{transform:rotateY(180deg);position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border-radius:20px}
+.fc-emoji{font-size:52px;margin-bottom:8px}
+.fc-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.fc-word{font-family:var(--display);font-size:30px;color:var(--text)}
+.fc-translation{font-size:17px;color:var(--accent4);font-weight:700;margin-top:4px}
+.fc-pron{font-size:13px;color:var(--text3);margin-top:6px}
+.fc-category{font-size:10px;color:var(--text3);margin-top:8px;background:var(--surface2);border-radius:50px;padding:2px 10px;display:inline-block}
+.answer-btns{display:flex;gap:10px;padding:14px 16px}
+.answer-btn{flex:1;padding:14px;border-radius:var(--radius);border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation}
+.answer-btn:active{transform:scale(.96)}
+.btn-correct{background:rgba(6,214,160,.15);color:var(--accent4);border:1px solid rgba(6,214,160,.3)}
+.btn-wrong{background:rgba(247,37,133,.1);color:#f06080;border:1px solid rgba(247,37,133,.2)}
+
+/* ── FILL BLANK ── */
+.fill-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:0 16px;font-size:17px;font-weight:600;line-height:1.9;text-align:center}
+.blank{display:inline-block;border-bottom:2px solid var(--accent);min-width:80px;text-align:center;color:var(--accent);font-weight:800;padding:0 6px}
+.fill-hint{padding:8px 16px;font-size:12px;color:var(--text3);text-align:center;font-style:italic}
+.fill-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px}
+.fill-opt{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 8px;text-align:center;font-weight:700;font-size:15px;cursor:pointer;transition:all .15s;touch-action:manipulation;font-family:var(--font)}
+.fill-opt:active{transform:scale(.96)}
+.fill-opt.correct{background:rgba(6,214,160,.15);border-color:var(--accent4);color:var(--accent4)}
+.fill-opt.wrong{background:rgba(247,37,133,.1);border-color:#f06080;color:#f06080}
+.fill-opt.reveal{background:rgba(6,214,160,.08);border-color:rgba(6,214,160,.3);color:var(--accent4)}
+.fill-opt.disabled{pointer-events:none;opacity:.45}
+.fill-explain{padding:6px 16px 10px;font-size:12px;color:var(--text2);text-align:center;line-height:1.5}
+
+/* ── SCRAMBLE ── */
+.scramble-tiles-wrap{padding:0 16px}
+.answer-track{background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius);padding:14px 12px;display:flex;gap:7px;justify-content:center;flex-wrap:wrap;min-height:68px;align-items:center;transition:border-color .3s,background .3s;margin-bottom:4px}
+.answer-track.correct-anim{border-color:var(--accent4);border-style:solid;background:rgba(6,214,160,.05)}
+.answer-track.wrong-anim{border-color:#f06080;border-style:solid;background:rgba(247,37,133,.05)}
+.scramble-fb{font-size:12px;text-align:center;padding:4px 16px;color:var(--text3);min-height:20px}
+.tiles-label{font-size:11px;color:var(--text3);text-align:center;padding:8px 0 4px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.tiles-grid{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:68px;align-items:center}
+.letter-tile{min-width:38px;height:46px;padding:0 6px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:18px;cursor:pointer;transition:all .15s;user-select:none;touch-action:manipulation}
+.letter-tile:active{transform:scale(.88)}
+.letter-tile.used{opacity:.25;pointer-events:none}
+.letter-tile.answer-tile{background:rgba(124,106,247,.2);border-color:var(--accent);color:var(--accent)}
+.action-row{display:flex;gap:10px;padding:12px 16px 0}
+.action-btn{flex:1;padding:14px;border-radius:var(--radius);border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;touch-action:manipulation}
+.action-btn:active{transform:scale(.97)}
+.btn-check{background:var(--accent);color:#fff}
+.btn-check:disabled{opacity:.35;cursor:default}
+.btn-clear{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--surface2);border-radius:50px;padding:10px 22px;font-weight:700;font-size:13px;z-index:500;opacity:0;transition:all .25s;white-space:nowrap;border:1px solid var(--border);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.good{border-color:var(--accent4);color:var(--accent4)}
+.toast.bad{border-color:#f06080;color:#f06080}
+
+/* ── CONGRATS ── */
+.congrats-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,20,.92);z-index:400;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;backdrop-filter:blur(4px)}
+.congrats-overlay.show{display:flex}
+.congrats-emoji{font-size:72px;margin-bottom:14px;animation:bob .6s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.congrats-title{font-family:var(--display);font-size:30px;background:linear-gradient(135deg,var(--gold),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.congrats-sub{color:var(--text2);font-size:13px;margin-bottom:6px}
+.congrats-score{font-size:28px;font-weight:900;margin-bottom:16px}
+.xp-pill{background:rgba(255,209,102,.12);border:1px solid rgba(255,209,102,.3);border-radius:50px;color:var(--gold);font-weight:800;font-size:16px;padding:8px 24px;margin-bottom:20px;display:inline-block}
+.cont-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:16px 40px;font-family:var(--font);font-size:16px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.cont-btn:active{transform:scale(.97)}
+
+/* ── PROGRESS SCREEN ── */
+.prog-screen-wrap{padding:16px}
+.level-card{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:14px;text-align:center}
+.lv-label{font-family:var(--display);font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px}
+.lv-num{font-family:var(--display);font-size:52px;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.lv-name{font-size:13px;color:var(--text2);margin-bottom:14px}
+.xp-bar-track{background:var(--surface3);border-radius:50px;height:10px;overflow:hidden}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:50px;transition:width .7s ease}
+.xp-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px}
+.achieve-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.achieve{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;transition:all .3s}
+.achieve.earned{border-color:rgba(255,209,102,.4);background:rgba(255,209,102,.05)}
+.achieve-icon{font-size:26px;margin-bottom:3px}
+.achieve-name{font-size:9px;color:var(--text3);font-weight:700;line-height:1.3}
+.achieve.earned .achieve-name{color:var(--gold)}
+.mode-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.ms-icon{font-size:18px;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ms-icon.flash{background:rgba(124,106,247,.15)}
+.ms-icon.fill{background:rgba(247,37,133,.15)}
+.ms-icon.scramble{background:rgba(76,201,240,.15)}
+.ms-body{flex:1;min-width:0}
+.ms-name{font-size:13px;font-weight:700}
+.ms-sub{font-size:11px;color:var(--text3)}
+.ms-score{font-weight:800;font-size:15px;color:var(--accent4);flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="hero">
+    <div class="hero-glow1"></div>
+    <div class="hero-glow2"></div>
+    <div class="app-title">InglésYa!</div>
+    <div class="app-subtitle">Tu camino al inglés — ¡un juego a la vez!</div>
+    <div class="stats-row">
+      <div class="stat-pill gold"><i class="fa-solid fa-bolt"></i><b id="home-xp">0</b> XP</div>
+      <div class="stat-pill"><i class="fa-solid fa-fire" style="color:#ff7b00"></i><b id="home-streak">0</b> días</div>
+      <div class="stat-pill green"><i class="fa-solid fa-trophy"></i>Nivel <b id="home-level">1</b></div>
+    </div>
+  </div>
+  <div class="streak-banner">
+    <div class="streak-fire">🔥</div>
+    <div>
+      <div class="streak-num" id="banner-streak">0 días</div>
+      <div class="streak-label">de racha — ¡tú puedes!</div>
+    </div>
+  </div>
+  <div class="section-title">Elige tu modo de juego</div>
+  <div class="game-cards">
+    <div class="game-card flash" onclick="startGame('flash')">
+      <div class="card-icon flash"><i class="fa-solid fa-layer-group" style="color:#7c6af7"></i></div>
+      <div class="card-body">
+        <div class="card-title">Tarjetas Flash</div>
+        <div class="card-desc">Mira la palabra en español, voltea la tarjeta y ve su traducción con pronunciación.</div>
+        <div class="card-meta">
+          <span class="card-badge badge-gold">⭐ Principiante</span>
+          <span class="card-badge badge-words">80+ palabras</span>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right card-arrow"></i>
+    </div>
+    <div class="game-card fill" onclick="startGame('fill')">
+      <div class="card-icon fill"><i class="fa-solid fa-pen-to-square" style="color:#f72585"></i></div>
+      <div class="card-body">
+        <div class="card-title">Completa la oración</div>
+        <div class="card-desc">Lee la oración en inglés y elige la palabra que falta. ¡Con contexto real!</div>
+        <div class="card-meta">
+          <span class="card-badge badge-gold">🎯 Intermedio</span>
+          <span class="card-badge badge-words">70+ oraciones</span>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right card-arrow"></i>
+    </div>
+    <div class="game-card scramble" onclick="startGame('scramble')">
+      <div class="card-icon scramble"><i class="fa-solid fa-shuffle" style="color:#4cc9f0"></i></div>
+      <div class="card-body">
+        <div class="card-title">Ordena las letras</div>
+        <div class="card-desc">Las letras están revueltas — ordénalas para formar la palabra correcta.</div>
+        <div class="card-meta">
+          <span class="card-badge badge-gold">🔥 Avanzado</span>
+          <span class="card-badge badge-words">60+ palabras</span>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right card-arrow"></i>
+    </div>
+  </div>
+  <div style="height:12px"></div>
+</div>
+
+<!-- FLASH GAME -->
+<div class="screen" id="screen-flash">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="game-mode-title">Tarjetas Flash</div>
+    <div class="xp-badge" id="flash-xp-badge">+5 XP/correcta</div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="flash-prog" style="width:0%"></div></div>
+    <div class="prog-labels"><span id="flash-qlbl">1 de 10</span><span id="flash-slbl">0 correctas</span></div>
+  </div>
+  <div class="q-area">
+    <div class="q-prompt">¿Cómo se dice esto en inglés?</div>
+    <div class="q-word" id="flash-es">—</div>
+    <div class="q-hint" id="flash-cat"></div>
+  </div>
+  <div class="fc-wrap">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="card-front">
+        <div class="fc-emoji" id="flash-emoji-f">❓</div>
+        <div class="fc-label">En español</div>
+        <div class="fc-word" id="flash-es-big">—</div>
+        <div class="fc-pron" style="margin-top:14px;color:var(--text3)">👆 Toca para ver en inglés</div>
+      </div>
+      <div class="card-back">
+        <div class="fc-emoji" id="flash-emoji-b">❓</div>
+        <div class="fc-label">En inglés</div>
+        <div class="fc-word" id="flash-en">—</div>
+        <div class="fc-translation" id="flash-pron">—</div>
+        <div class="fc-category" id="flash-cat-b"></div>
+      </div>
+    </div>
+  </div>
+  <div id="flash-btns" style="display:none">
+    <div class="answer-btns">
+      <button class="answer-btn btn-wrong" onclick="flashAnswer(false)">✗ No la sabía</button>
+      <button class="answer-btn btn-correct" onclick="flashAnswer(true)">✓ ¡La sabía!</button>
+    </div>
+  </div>
+</div>
+
+<!-- FILL GAME -->
+<div class="screen" id="screen-fill">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="game-mode-title">Completa la oración</div>
+    <div class="xp-badge" id="fill-xp-badge">+7 XP/correcta</div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="fill-prog" style="width:0%"></div></div>
+    <div class="prog-labels"><span id="fill-qlbl">1 de 10</span><span id="fill-slbl">0 correctas</span></div>
+  </div>
+  <div class="q-area">
+    <div class="q-prompt">Escoge la palabra que completa la oración:</div>
+  </div>
+  <div class="fill-card" id="fill-sentence">—</div>
+  <div class="fill-hint" id="fill-hint">—</div>
+  <div class="fill-options" id="fill-opts"></div>
+  <div class="fill-explain" id="fill-explain"></div>
+</div>
+
+<!-- SCRAMBLE GAME -->
+<div class="screen" id="screen-scramble">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="game-mode-title">Ordena las letras</div>
+    <div class="xp-badge">+10 XP/correcta</div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="scr-prog" style="width:0%"></div></div>
+    <div class="prog-labels"><span id="scr-qlbl">1 de 10</span><span id="scr-slbl">0 correctas</span></div>
+  </div>
+  <div class="q-area">
+    <div class="q-prompt">Ordena las letras para formar la palabra:</div>
+    <div class="q-word" id="scr-clue">—</div>
+    <div class="q-hint" id="scr-hint"></div>
+  </div>
+  <div class="scramble-tiles-wrap">
+    <div class="answer-track" id="scr-answer"></div>
+    <div class="scramble-fb" id="scr-fb"></div>
+    <div class="tiles-label">Letras disponibles</div>
+    <div class="tiles-grid" id="scr-tiles"></div>
+  </div>
+  <div class="action-row">
+    <button class="action-btn btn-clear" onclick="clearScramble()">Borrar todo</button>
+    <button class="action-btn btn-check" id="scr-check" onclick="checkScramble()" disabled>Verificar</button>
+  </div>
+</div>
+
+<!-- PROGRESS SCREEN -->
+<div class="screen" id="screen-progress">
+  <div class="game-header" style="position:relative">
+    <div class="game-mode-title" style="font-size:17px">Mi progreso</div>
+  </div>
+  <div class="prog-screen-wrap">
+    <div class="level-card">
+      <div class="lv-label">Nivel actual</div>
+      <div class="lv-num" id="pg-lvnum">1</div>
+      <div class="lv-name" id="pg-lvname">Principiante</div>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="pg-xpbar" style="width:0%"></div></div>
+      <div class="xp-bar-labels"><span id="pg-xpcur">0 XP</span><span id="pg-xpnext">—</span></div>
+    </div>
+    <div class="section-title" style="padding:0 0 10px">Logros</div>
+    <div class="achieve-grid" id="achieve-grid"></div>
+    <div class="section-title" style="padding:16px 0 10px">Por modo de juego</div>
+    <div class="mode-stat">
+      <div class="ms-icon flash"><i class="fa-solid fa-layer-group" style="color:#7c6af7"></i></div>
+      <div class="ms-body"><div class="ms-name">Tarjetas Flash</div><div class="ms-sub" id="flash-stat-sub">0 rondas</div></div>
+      <div class="ms-score" id="flash-stat-pct">—</div>
+    </div>
+    <div class="mode-stat">
+      <div class="ms-icon fill"><i class="fa-solid fa-pen-to-square" style="color:#f72585"></i></div>
+      <div class="ms-body"><div class="ms-name">Completa la oración</div><div class="ms-sub" id="fill-stat-sub">0 rondas</div></div>
+      <div class="ms-score" id="fill-stat-pct">—</div>
+    </div>
+    <div class="mode-stat">
+      <div class="ms-icon scramble"><i class="fa-solid fa-shuffle" style="color:#4cc9f0"></i></div>
+      <div class="ms-body"><div class="ms-name">Ordena las letras</div><div class="ms-sub" id="scr-stat-sub">0 rondas</div></div>
+      <div class="ms-score" id="scr-stat-pct">—</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CONGRATS -->
+<div class="congrats-overlay" id="congrats">
+  <div class="congrats-emoji">🏆</div>
+  <div class="congrats-title">¡Ronda completa!</div>
+  <div class="congrats-sub">Terminaste todas las preguntas</div>
+  <div class="congrats-score" id="cg-score">— / —</div>
+  <div class="xp-pill" id="cg-xp">+0 XP</div>
+  <button class="cont-btn" onclick="closeCongrats()">Seguir aprendiendo →</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showNav('home')">
+    <i class="fa-solid fa-house"></i>Inicio
+  </button>
+  <button class="nav-btn" id="nav-progress" onclick="showNav('progress')">
+    <i class="fa-solid fa-chart-line"></i>Progreso
+  </button>
+</nav>
+
+<script>
+/* ═══════════════════════════════════════════
+   WORD BANK — 210+ items across 3 modes
+═══════════════════════════════════════════ */
+const DATA = {
+
+flash: [
+  /* --- Saludos / Greetings --- */
+  {es:'Hola',en:'Hello',emoji:'👋',pron:'[é-lo]',cat:'Saludos'},
+  {es:'Buenos días',en:'Good morning',emoji:'🌅',pron:'[gud mór-ning]',cat:'Saludos'},
+  {es:'Buenas tardes',en:'Good afternoon',emoji:'☀️',pron:'[gud áf-ter-nuun]',cat:'Saludos'},
+  {es:'Buenas noches',en:'Good night',emoji:'🌙',pron:'[gud náit]',cat:'Saludos'},
+  {es:'¿Cómo estás?',en:'How are you?',emoji:'🙂',pron:'[jáu ar yú]',cat:'Saludos'},
+  {es:'Mucho gusto',en:'Nice to meet you',emoji:'🤝',pron:'[náis tu míit yu]',cat:'Saludos'},
+  {es:'Adiós',en:'Goodbye',emoji:'👋',pron:'[gud-bái]',cat:'Saludos'},
+  {es:'Hasta luego',en:'See you later',emoji:'✌️',pron:'[síi yu léi-ter]',cat:'Saludos'},
+  /* --- Familia / Family --- */
+  {es:'Madre / Mamá',en:'Mother / Mom',emoji:'👩',pron:'[mó-der / mom]',cat:'Familia'},
+  {es:'Padre / Papá',en:'Father / Dad',emoji:'👨',pron:'[fá-der / dad]',cat:'Familia'},
+  {es:'Hermano',en:'Brother',emoji:'👦',pron:'[brÓ-der]',cat:'Familia'},
+  {es:'Hermana',en:'Sister',emoji:'👧',pron:'[sís-ter]',cat:'Familia'},
+  {es:'Hijo',en:'Son',emoji:'👶',pron:'[son]',cat:'Familia'},
+  {es:'Hija',en:'Daughter',emoji:'👶',pron:'[dÓ-ter]',cat:'Familia'},
+  {es:'Esposo',en:'Husband',emoji:'💍',pron:'[jós-band]',cat:'Familia'},
+  {es:'Esposa',en:'Wife',emoji:'💍',pron:'[wáif]',cat:'Familia'},
+  {es:'Abuelo',en:'Grandfather',emoji:'👴',pron:'[grand-fá-der]',cat:'Familia'},
+  {es:'Abuela',en:'Grandmother',emoji:'👵',pron:'[grand-mó-der]',cat:'Familia'},
+  /* --- Cuerpo / Body --- */
+  {es:'Cabeza',en:'Head',emoji:'🗣️',pron:'[jed]',cat:'Cuerpo'},
+  {es:'Mano',en:'Hand',emoji:'✋',pron:'[jand]',cat:'Cuerpo'},
+  {es:'Ojo',en:'Eye',emoji:'👁️',pron:'[ái]',cat:'Cuerpo'},
+  {es:'Nariz',en:'Nose',emoji:'👃',pron:'[nóus]',cat:'Cuerpo'},
+  {es:'Boca',en:'Mouth',emoji:'👄',pron:'[máuz]',cat:'Cuerpo'},
+  {es:'Oído / Oreja',en:'Ear',emoji:'👂',pron:'[íir]',cat:'Cuerpo'},
+  {es:'Pie',en:'Foot',emoji:'🦶',pron:'[fut]',cat:'Cuerpo'},
+  {es:'Espalda',en:'Back',emoji:'🔙',pron:'[bak]',cat:'Cuerpo'},
+  /* --- Comida / Food --- */
+  {es:'Agua',en:'Water',emoji:'💧',pron:'[wÓ-ter]',cat:'Comida'},
+  {es:'Comida',en:'Food',emoji:'🍽️',pron:'[fuud]',cat:'Comida'},
+  {es:'Desayuno',en:'Breakfast',emoji:'🍳',pron:'[brek-fast]',cat:'Comida'},
+  {es:'Almuerzo',en:'Lunch',emoji:'🥗',pron:'[lonch]',cat:'Comida'},
+  {es:'Cena',en:'Dinner',emoji:'🍖',pron:'[dí-ner]',cat:'Comida'},
+  {es:'Pollo',en:'Chicken',emoji:'🍗',pron:'[chí-ken]',cat:'Comida'},
+  {es:'Arroz',en:'Rice',emoji:'🍚',pron:'[ráis]',cat:'Comida'},
+  {es:'Habichuela / Frijol',en:'Bean',emoji:'🫘',pron:'[bíin]',cat:'Comida'},
+  {es:'Pan',en:'Bread',emoji:'🍞',pron:'[bred]',cat:'Comida'},
+  {es:'Leche',en:'Milk',emoji:'🥛',pron:'[milk]',cat:'Comida'},
+  {es:'Huevo',en:'Egg',emoji:'🥚',pron:'[eg]',cat:'Comida'},
+  {es:'Carne',en:'Meat',emoji:'🥩',pron:'[miit]',cat:'Comida'},
+  {es:'Fruta',en:'Fruit',emoji:'🍎',pron:'[fruut]',cat:'Comida'},
+  {es:'Verdura',en:'Vegetable',emoji:'🥦',pron:'[vé-ye-ta-bol]',cat:'Comida'},
+  /* --- Trabajo / Work --- */
+  {es:'Trabajo',en:'Work / Job',emoji:'💼',pron:'[wérk / yob]',cat:'Trabajo'},
+  {es:'Jefe / Jefa',en:'Boss',emoji:'👔',pron:'[bos]',cat:'Trabajo'},
+  {es:'Compañero',en:'Coworker',emoji:'🤝',pron:'[kóu-wér-ker]',cat:'Trabajo'},
+  {es:'Reunión',en:'Meeting',emoji:'📋',pron:'[míi-ting]',cat:'Trabajo'},
+  {es:'Oficina',en:'Office',emoji:'🏢',pron:'[Ó-fis]',cat:'Trabajo'},
+  {es:'Sueldo / Salario',en:'Salary / Pay',emoji:'💰',pron:'[sá-la-ri / pei]',cat:'Trabajo'},
+  {es:'Horario',en:'Schedule',emoji:'📅',pron:'[ské-yul]',cat:'Trabajo'},
+  {es:'Descanso',en:'Break',emoji:'☕',pron:'[breik]',cat:'Trabajo'},
+  /* --- Lugares / Places --- */
+  {es:'Casa',en:'House / Home',emoji:'🏠',pron:'[jáus / jóum]',cat:'Lugares'},
+  {es:'Tienda',en:'Store / Shop',emoji:'🏪',pron:'[stóor / shop]',cat:'Lugares'},
+  {es:'Hospital',en:'Hospital',emoji:'🏥',pron:'[jós-pi-tal]',cat:'Lugares'},
+  {es:'Escuela',en:'School',emoji:'🏫',pron:'[skúul]',cat:'Lugares'},
+  {es:'Iglesia',en:'Church',emoji:'⛪',pron:'[chérch]',cat:'Lugares'},
+  {es:'Banco',en:'Bank',emoji:'🏦',pron:'[bank]',cat:'Lugares'},
+  {es:'Farmacia',en:'Pharmacy',emoji:'💊',pron:'[fár-ma-si]',cat:'Lugares'},
+  {es:'Supermercado',en:'Supermarket',emoji:'🛒',pron:'[sú-per-már-ket]',cat:'Lugares'},
+  {es:'Aeropuerto',en:'Airport',emoji:'✈️',pron:'[éir-port]',cat:'Lugares'},
+  {es:'Parada de autobús',en:'Bus stop',emoji:'🚌',pron:'[bos stop]',cat:'Lugares'},
+  /* --- Transporte / Transport --- */
+  {es:'Carro / Coche',en:'Car',emoji:'🚗',pron:'[kár]',cat:'Transporte'},
+  {es:'Autobús / Guagua',en:'Bus',emoji:'🚌',pron:'[bos]',cat:'Transporte'},
+  {es:'Tren',en:'Train',emoji:'🚆',pron:'[trein]',cat:'Transporte'},
+  {es:'Avión',en:'Airplane',emoji:'✈️',pron:'[éir-plein]',cat:'Transporte'},
+  {es:'Taxi',en:'Taxi / Cab',emoji:'🚕',pron:'[ták-si / kab]',cat:'Transporte'},
+  /* --- Números / Numbers --- */
+  {es:'Uno',en:'One',emoji:'1️⃣',pron:'[won]',cat:'Números'},
+  {es:'Dos',en:'Two',emoji:'2️⃣',pron:'[tuu]',cat:'Números'},
+  {es:'Tres',en:'Three',emoji:'3️⃣',pron:'[zríi]',cat:'Números'},
+  {es:'Diez',en:'Ten',emoji:'🔟',pron:'[ten]',cat:'Números'},
+  {es:'Cien',en:'One hundred',emoji:'💯',pron:'[won jón-dred]',cat:'Números'},
+  /* --- Emergencias / Emergencies --- */
+  {es:'Ayuda',en:'Help',emoji:'🆘',pron:'[jelp]',cat:'Emergencias'},
+  {es:'Llame a la policía',en:'Call the police',emoji:'🚔',pron:'[kol de po-líis]',cat:'Emergencias'},
+  {es:'Médico / Doctor',en:'Doctor',emoji:'🩺',pron:'[dÓk-tor]',cat:'Emergencias'},
+  {es:'Emergencia',en:'Emergency',emoji:'🚨',pron:'[i-mér-yen-si]',cat:'Emergencias'},
+  {es:'Me duele',en:'It hurts',emoji:'😣',pron:'[it jérts]',cat:'Emergencias'},
+  /* --- Tiempo / Time --- */
+  {es:'Hoy',en:'Today',emoji:'📅',pron:'[tu-déi]',cat:'Tiempo'},
+  {es:'Mañana',en:'Tomorrow',emoji:'🌅',pron:'[tu-mÓ-ro]',cat:'Tiempo'},
+  {es:'Ayer',en:'Yesterday',emoji:'⏮️',pron:'[yés-ter-dei]',cat:'Tiempo'},
+  {es:'Ahora',en:'Now',emoji:'⚡',pron:'[náu]',cat:'Tiempo'},
+  {es:'Tarde',en:'Late',emoji:'⏰',pron:'[leit]',cat:'Tiempo'},
+  {es:'Temprano',en:'Early',emoji:'🌄',pron:'[ér-li]',cat:'Tiempo'},
+  /* --- Colores / Colors --- */
+  {es:'Rojo',en:'Red',emoji:'🔴',pron:'[red]',cat:'Colores'},
+  {es:'Azul',en:'Blue',emoji:'🔵',pron:'[bluu]',cat:'Colores'},
+  {es:'Verde',en:'Green',emoji:'🟢',pron:'[griin]',cat:'Colores'},
+  {es:'Amarillo',en:'Yellow',emoji:'🟡',pron:'[yé-lo]',cat:'Colores'},
+  {es:'Negro',en:'Black',emoji:'⚫',pron:'[blak]',cat:'Colores'},
+  {es:'Blanco',en:'White',emoji:'⚪',pron:'[wáit]',cat:'Colores'},
+],
+
+fill: [
+  /* --- Daily life --- */
+  {s:'I drink ___ every morning.',b:'coffee',o:['coffee','window','happy','clean'],t:'Tomo ___ cada mañana.',x:'Coffee = café. "Drink coffee" = tomar café.'},
+  {s:'She goes to ___ on Monday.',b:'work',o:['work','sleep','tall','book'],t:'Ella va al ___ los lunes.',x:'Work = trabajo. "Go to work" = ir al trabajo.'},
+  {s:'Can you help me, ___?',b:'please',o:['please','fast','blue','again'],t:'¿Me puedes ayudar, ___?',x:'Please = por favor. Siempre sé educado en inglés.'},
+  {s:'The ___ is very cold today.',b:'weather',o:['weather','table','dream','walk'],t:'El ___ está muy frío hoy.',x:'Weather = tiempo/clima. "Cold weather" = clima frío.'},
+  {s:'I need to buy some ___.',b:'food',o:['food','clean','night','loud'],t:'Necesito comprar ___.',x:'Food = comida. "Buy food" = comprar comida.'},
+  {s:'My ___ lives in New York.',b:'sister',o:['sister','window','hard','open'],t:'Mi ___ vive en Nueva York.',x:'Sister = hermana. Brother = hermano.'},
+  {s:'What time does the ___ open?',b:'store',o:['store','beautiful','dark','swim'],t:'¿A qué hora abre la ___?',x:'Store = tienda. "What time" = ¿a qué hora?'},
+  {s:'I feel very ___ today.',b:'tired',o:['tired','table','glass','tree'],t:'Me siento muy ___ hoy.',x:'Tired = cansado/a. También: "I am exhausted" = estoy agotado.'},
+  {s:'He takes the ___ to work.',b:'bus',o:['bus','cake','light','round'],t:'Él toma el ___ para ir al trabajo.',x:'Bus = autobús/guagua. "Take the bus" = tomar la guagua.'},
+  {s:'We live in a small ___.',b:'house',o:['house','jump','cold','write'],t:'Vivimos en una ___ pequeña.',x:'House = casa. "Small house" = casa pequeña.'},
+  /* --- Health --- */
+  {s:'I have a ___ in my stomach.',b:'pain',o:['pain','color','jump','soft'],t:'Tengo un ___ en el estómago.',x:'Pain = dolor. "Stomach pain" = dolor de estómago.'},
+  {s:'Please call a ___.',b:'doctor',o:['doctor','window','pretty','loud'],t:'Por favor llama a un ___.',x:'Doctor = médico. En EEUU también se dice "physician".'},
+  {s:'Take this ___ twice a day.',b:'medicine',o:['medicine','carpet','funny','light'],t:'Toma esta ___ dos veces al día.',x:'Medicine = medicina/pastilla. "Twice a day" = dos veces al día.'},
+  {s:'I have a ___ and a runny nose.',b:'cold',o:['cold','happy','table','fast'],t:'Tengo un ___ y la nariz mocosa.',x:'Cold = resfriado. "Runny nose" = nariz que moquea.'},
+  {s:'She needs to go to the ___.',b:'hospital',o:['hospital','library','shoe','sand'],t:'Ella necesita ir al ___.',x:'Hospital = hospital. "Go to the hospital" = ir al hospital.'},
+  /* --- Work --- */
+  {s:'I start work at ___ in the morning.',b:'eight',o:['eight','heavy','purple','quiet'],t:'Empiezo a trabajar a las ___ de la mañana.',x:'Eight = ocho. Los números en inglés son esenciales en el trabajo.'},
+  {s:'My ___ is very fair.',b:'boss',o:['boss','storm','pillow','green'],t:'Mi ___ es muy justo.',x:'Boss = jefe/jefa. "Fair boss" = jefe/a justo/a.'},
+  {s:'We have a ___ at three o\'clock.',b:'meeting',o:['meeting','carpet','cloud','shiny'],t:'Tenemos una ___ a las tres.',x:'Meeting = reunión. "Three o\'clock" = las tres en punto.'},
+  {s:'Can I take a ___ break?',b:'lunch',o:['lunch','heavy','strange','bright'],t:'¿Puedo tomar el descanso de ___?',x:'Lunch = almuerzo. "Lunch break" = descanso para almorzar.'},
+  {s:'Please sign this ___.',b:'form',o:['form','blue','river','slim'],t:'Por favor firma este ___.',x:'Form = formulario. "Sign a form" = firmar un formulario.'},
+  /* --- Shopping --- */
+  {s:'How much does this ___?',b:'cost',o:['cost','dream','purple','land'],t:'¿Cuánto ___ esto?',x:'"How much does this cost?" = ¿cuánto cuesta esto? Muy útil en la tienda.'},
+  {s:'Do you have this in a different ___?',b:'size',o:['size','moon','angry','sharp'],t:'¿Tiene esto en otra ___?',x:'Size = talla/tamaño. "Different size" = otra talla.'},
+  {s:'I would like to pay by ___.',b:'card',o:['card','smile','dark','heavy'],t:'Quisiera pagar con ___.',x:'Card = tarjeta (de crédito/débito). "Pay by card" = pagar con tarjeta.'},
+  {s:'Can I get a ___?',b:'receipt',o:['receipt','cloudy','smooth','deep'],t:'¿Me puede dar un ___?',x:'Receipt = recibo. Siempre pide tu recibo.'},
+  /* --- Directions --- */
+  {s:'Turn ___ at the corner.',b:'left',o:['left','happy','smooth','giant'],t:'Dobla a la ___ en la esquina.',x:'Left = izquierda. Right = derecha. "Turn left" = dobla a la izquierda.'},
+  {s:'Go ___ two blocks.',b:'straight',o:['straight','purple','giant','fluffy'],t:'Sigue ___ dos cuadras.',x:'Straight = recto/derecho. "Go straight" = sigue derecho.'},
+  {s:'The bank is ___ the store.',b:'near',o:['near','brave','silver','rocky'],t:'El banco está ___ la tienda.',x:'Near = cerca. "Near the store" = cerca de la tienda.'},
+  {s:'Cross the ___ at the light.',b:'street',o:['street','fluffy','quiet','orange'],t:'Cruza la ___ en el semáforo.',x:'Street = calle. "Cross the street" = cruzar la calle.'},
+  /* --- Home --- */
+  {s:'Please close the ___.',b:'door',o:['door','purple','swim','magic'],t:'Por favor cierra la ___.',x:'Door = puerta. "Close the door" = cerrar la puerta.'},
+  {s:'The ___ is broken.',b:'sink',o:['sink','honest','quiet','brave'],t:'El ___ está roto.',x:'Sink = fregadero/lavamanos. Common home vocabulary.'},
+  {s:'I need to wash the ___.',b:'dishes',o:['dishes','thunder','clever','bright'],t:'Necesito lavar los ___.',x:'Dishes = platos/trastes. "Wash the dishes" = lavar los platos.'},
+  {s:'Can you turn off the ___?',b:'light',o:['light','heavy','purple','sandy'],t:'¿Puedes apagar el ___?',x:'Light = luz. "Turn off" = apagar. "Turn on" = encender.'},
+  /* --- Polite phrases --- */
+  {s:'Excuse me, where is the ___?',b:'bathroom',o:['bathroom','golden','silent','brave'],t:'Disculpe, ¿dónde está el ___?',x:'Bathroom = baño. "Excuse me" = disculpe/perdone.'},
+  {s:'I don\'t ___ English well.',b:'speak',o:['speak','jump','paint','build'],t:'No ___ bien el inglés.',x:'"Speak English" = hablar inglés. Útil para pedir ayuda.'},
+  {s:'Could you ___ that, please?',b:'repeat',o:['repeat','forget','build','create'],t:'¿Podría ___ eso, por favor?',x:'Repeat = repetir. "Could you repeat?" = ¿Podría repetir?'},
+  {s:'I am ___ for that.',b:'sorry',o:['sorry','happy','tall','fast'],t:'Lo ___ mucho.',x:'Sorry = lo siento. "I am sorry" = lo siento / disculpa.'},
+  /* --- Weather --- */
+  {s:'It is very ___ outside.',b:'hot',o:['hot','purple','silent','shiny'],t:'Está muy ___ afuera.',x:'Hot = caliente/caluroso. "It\'s hot" = hace calor.'},
+  {s:'Bring an umbrella, it might ___.',b:'rain',o:['rain','laugh','clean','build'],t:'Trae un paraguas, puede ___.',x:'Rain = llover. "It might rain" = puede que llueva.'},
+  /* --- Numbers/Time context --- */
+  {s:'I have ___ children.',b:'three',o:['three','green','quiet','brave'],t:'Tengo ___ hijos.',x:'Three = tres. Aprender los números es esencial.'},
+  {s:'The class starts at ___ thirty.',b:'nine',o:['nine','blue','smooth','giant'],t:'La clase empieza a las ___ y media.',x:'Nine = nueve. "Nine thirty" = las nueve y media.'},
+],
+
+scramble: [
+  /* Basic */
+  {c:'Hola / Saludo básico',w:'HELLO',h:'Lo primero que dices al llegar'},
+  {c:'Gracias',w:'THANKS',h:'Para agradecer informalmente'},
+  {c:'Por favor',w:'PLEASE',h:'Siempre úsalo al pedir algo'},
+  {c:'Lo siento',w:'SORRY',h:'Para disculparte'},
+  {c:'Sí',w:'YES',h:'Respuesta afirmativa'},
+  {c:'No',w:'NO',h:'Respuesta negativa — igual que en español'},
+  {c:'Bien / Bueno',w:'GOOD',h:'Adjetivo positivo muy usado'},
+  {c:'Muy / Mucho',w:'VERY',h:'Para enfatizar: "very good" = muy bueno'},
+  /* People & places */
+  {c:'Amigo / Amiga',w:'FRIEND',h:'Persona cercana a ti'},
+  {c:'Familia',w:'FAMILY',h:'Tu gente más querida'},
+  {c:'Médico / Doctor',w:'DOCTOR',h:'El que te atiende cuando estás enfermo'},
+  {c:'Jefe / Jefa',w:'BOSS',h:'La persona que manda en el trabajo'},
+  {c:'Vecino',w:'NEIGHBOR',h:'El que vive al lado tuyo'},
+  {c:'Policía',w:'POLICE',h:'Los que mantienen el orden'},
+  {c:'Tienda',w:'STORE',h:'Donde vas a comprar'},
+  {c:'Escuela',w:'SCHOOL',h:'Donde se aprende'},
+  {c:'Hospital',w:'HOSPITAL',h:'Donde van los enfermos'},
+  {c:'Banco',w:'BANK',h:'Donde guardas tu dinero'},
+  /* Food */
+  {c:'Pollo',w:'CHICKEN',h:'Carne muy común'},
+  {c:'Arroz',w:'RICE',h:'Alimento básico dominicano'},
+  {c:'Agua',w:'WATER',h:'Líquido esencial para vivir'},
+  {c:'Pan',w:'BREAD',h:'Lo que comes en el desayuno'},
+  {c:'Leche',w:'MILK',h:'Líquido blanco de la vaca'},
+  {c:'Azúcar',w:'SUGAR',h:'Lo que hace dulce el café'},
+  {c:'Fruta',w:'FRUIT',h:'Mango, chinola, plátano...'},
+  /* Work */
+  {c:'Trabajo',w:'WORK',h:'Lo que haces para ganar dinero'},
+  {c:'Dinero',w:'MONEY',h:'Lo que usas para pagar'},
+  {c:'Reunión',w:'MEETING',h:'Cuando el equipo se junta a hablar'},
+  {c:'Hora / Tiempo',w:'TIME',h:'"What time is it?" = ¿Qué hora es?'},
+  {c:'Formulario',w:'FORM',h:'Papel que tienes que llenar y firmar'},
+  /* Health */
+  {c:'Dolor',w:'PAIN',h:'"I have pain" = tengo dolor'},
+  {c:'Enfermo/a',w:'SICK',h:'"I feel sick" = me siento mal'},
+  {c:'Medicina / Pastilla',w:'PILL',h:'Lo que el doctor te receta'},
+  {c:'Embarazada',w:'PREGNANT',h:'Cuando la mujer espera un bebé'},
+  /* Home */
+  {c:'Casa',w:'HOUSE',h:'Donde vives'},
+  {c:'Puerta',w:'DOOR',h:'"Open the door" = abre la puerta'},
+  {c:'Ventana',w:'WINDOW',h:'Por donde entra la luz'},
+  {c:'Cocina',w:'KITCHEN',h:'Donde se prepara la comida'},
+  {c:'Baño',w:'BATHROOM',h:'"Where is the bathroom?" = ¿Dónde está el baño?'},
+  /* Common adjectives */
+  {c:'Grande',w:'BIG',h:'Lo contrario de pequeño'},
+  {c:'Pequeño/a',w:'SMALL',h:'Lo contrario de grande'},
+  {c:'Caliente',w:'HOT',h:'"The food is hot" = la comida está caliente'},
+  {c:'Frío/a',w:'COLD',h:'"It\'s cold" = hace frío'},
+  {c:'Rápido/a',w:'FAST',h:'Lo contrario de lento'},
+  {c:'Nuevo/a',w:'NEW',h:'"New job" = trabajo nuevo'},
+  {c:'Viejo/a',w:'OLD',h:'"Old car" = carro viejo'},
+  /* Verbs */
+  {c:'Necesitar',w:'NEED',h:'"I need help" = necesito ayuda'},
+  {c:'Querer / Desear',w:'WANT',h:'"I want water" = quiero agua'},
+  {c:'Comprar',w:'BUY',h:'"I want to buy" = quiero comprar'},
+  {c:'Vivir',w:'LIVE',h:'"I live here" = vivo aquí'},
+  {c:'Trabajar',w:'WORK',h:'También verbo: "I work here" = trabajo aquí'},
+  {c:'Hablar',w:'SPEAK',h:'"I speak Spanish" = hablo español'},
+  {c:'Entender',w:'UNDERSTAND',h:'"I don\'t understand" = no entiendo'},
+  {c:'Ayudar',w:'HELP',h:'"Can you help me?" = ¿me puedes ayudar?'},
+  {c:'Llamar',w:'CALL',h:'"Call me" = llámame'},
+  {c:'Escribir',w:'WRITE',h:'"Write your name" = escribe tu nombre'},
+  /* DR-specific / important */
+  {c:'Guagua (autobús)',w:'BUS',h:'Transporte público'},
+  {c:'Vecindario / Barrio',w:'NEIGHBORHOOD',h:'El área donde vives'},
+  {c:'Identificación',w:'ID',h:'Tu documento de identidad'},
+  {c:'Entrevista de trabajo',w:'INTERVIEW',h:'Cuando aplicas a un trabajo'},
+  {c:'Permiso',w:'PERMIT',h:'Documento oficial que te autoriza algo'},
+]
+};
+
+/* ═══════════════════════════════════════════
+   STATE & PERSISTENCE
+═══════════════════════════════════════════ */
+const LEVELS=[
+  {name:'Principiante',xp:0},
+  {name:'Aprendiz',xp:100},
+  {name:'Practicante',xp:250},
+  {name:'Intermedio',xp:500},
+  {name:'Avanzado',xp:900},
+  {name:'Experto',xp:1500}
+];
+const ACHIEVEMENTS=[
+  {id:'first',name:'¡Primera vez!',icon:'🎉',cond:s=>s.xp>=10},
+  {id:'flash5',name:'5 flash correctas',icon:'🃏',cond:s=>s.stats.flash.correct>=5},
+  {id:'fill5',name:'5 oraciones completas',icon:'✍️',cond:s=>s.stats.fill.correct>=5},
+  {id:'scr3',name:'3 palabras ordenadas',icon:'🔀',cond:s=>s.stats.scr.correct>=3},
+  {id:'xp50',name:'50 XP ganados',icon:'⚡',cond:s=>s.xp>=50},
+  {id:'xp100',name:'100 XP totales',icon:'💯',cond:s=>s.xp>=100},
+  {id:'xp500',name:'500 XP — ¡Pro!',icon:'🔥',cond:s=>s.xp>=500},
+  {id:'streak3',name:'3 días seguidos',icon:'📅',cond:s=>s.streak>=3},
+  {id:'all3modes',name:'Los 3 modos',icon:'🏅',cond:s=>s.stats.flash.rounds>0&&s.stats.fill.rounds>0&&s.stats.scr.rounds>0},
+];
+
+let ST={xp:0,streak:1,lastPlay:'',stats:{flash:{rounds:0,correct:0,total:0},fill:{rounds:0,correct:0,total:0},scr:{rounds:0,correct:0,total:0}}};
+function saveS(){try{localStorage.setItem('iy2',JSON.stringify(ST));}catch(e){}}
+function loadS(){try{const d=localStorage.getItem('iy2');if(d){ST=JSON.parse(d);}}catch(e){}}
+loadS();
+checkStreak();
+
+function checkStreak(){
+  const today=new Date().toDateString();
+  if(ST.lastPlay&&ST.lastPlay!==today){
+    const diff=(new Date(today)-new Date(ST.lastPlay))/(1000*60*60*24);
+    if(diff>1)ST.streak=1;
+  }
+}
+
+function getLevel(){let l=0;for(let i=0;i<LEVELS.length;i++){if(ST.xp>=LEVELS[i].xp)l=i;}return l;}
+function getLvXP(){
+  const l=getLevel();
+  const base=LEVELS[l].xp;
+  const cur=ST.xp-base;
+  const next=l+1<LEVELS.length?LEVELS[l+1].xp-base:999;
+  return{cur,next,pct:Math.min(100,Math.round(cur/next*100))};
+}
+function addXP(n){ST.xp+=n;ST.lastPlay=new Date().toDateString();saveS();}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+function showNav(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  document.getElementById('app').scrollTop=0;
+  if(name==='home')renderHome();
+  if(name==='progress')renderProgress();
+}
+function goHome(){showNav('home');}
+function startGame(mode){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(mode==='flash')initFlash();
+  else if(mode==='fill')initFill();
+  else if(mode==='scramble')initScramble();
+}
+
+/* ═══════════════════════════════════════════
+   HOME
+═══════════════════════════════════════════ */
+function renderHome(){
+  const l=getLevel();
+  document.getElementById('home-xp').textContent=ST.xp;
+  document.getElementById('home-streak').textContent=ST.streak;
+  document.getElementById('home-level').textContent=l+1;
+  document.getElementById('banner-streak').textContent=ST.streak+(ST.streak===1?' día':' días');
+}
+renderHome();
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function toast(msg,type,dur=1800){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',dur);
+}
+
+/* ═══════════════════════════════════════════
+   SHUFFLE
+═══════════════════════════════════════════ */
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+/* ═══════════════════════════════════════════
+   END ROUND
+═══════════════════════════════════════════ */
+function endRound(mode,score,total){
+  let xp=0;
+  if(mode==='flash'){xp=score*5+10;ST.stats.flash.rounds++;ST.stats.flash.correct+=score;ST.stats.flash.total+=total;}
+  else if(mode==='fill'){xp=score*7+15;ST.stats.fill.rounds++;ST.stats.fill.correct+=score;ST.stats.fill.total+=total;}
+  else if(mode==='scr'){xp=score*10+20;ST.stats.scr.rounds++;ST.stats.scr.correct+=score;ST.stats.scr.total+=total;}
+  addXP(xp);
+  document.getElementById('cg-score').textContent=score+' de '+total+' correctas';
+  document.getElementById('cg-xp').textContent='+'+xp+' XP ganados';
+  document.getElementById('congrats').classList.add('show');
+}
+function closeCongrats(){
+  document.getElementById('congrats').classList.remove('show');
+  goHome();
+}
+
+/* ═══════════════════════════════════════════
+   FLASH GAME
+═══════════════════════════════════════════ */
+let FL={};
+function initFlash(){
+  document.getElementById('screen-flash').classList.add('active');
+  FL={items:shuffle(DATA.flash).slice(0,10),idx:0,score:0,flipped:false};
+  renderFlash();
+}
+function renderFlash(){
+  if(FL.idx>=FL.items.length){endRound('flash',FL.score,FL.items.length);return;}
+  const it=FL.items[FL.idx];
+  const pct=Math.round(FL.idx/FL.items.length*100);
+  document.getElementById('flash-prog').style.width=pct+'%';
+  document.getElementById('flash-qlbl').textContent=(FL.idx+1)+' de '+FL.items.length;
+  document.getElementById('flash-slbl').textContent=FL.score+' correctas';
+  document.getElementById('flash-es').textContent=it.es;
+  document.getElementById('flash-cat').textContent='📂 '+it.cat;
+  document.getElementById('flash-emoji-f').textContent=it.emoji;
+  document.getElementById('flash-emoji-b').textContent=it.emoji;
+  document.getElementById('flash-es-big').textContent=it.es;
+  document.getElementById('flash-en').textContent=it.en;
+  document.getElementById('flash-pron').textContent=it.pron;
+  document.getElementById('flash-cat-b').textContent=it.cat;
+  const fc=document.getElementById('flashcard');
+  fc.classList.remove('flipped');
+  document.getElementById('flash-btns').style.display='none';
+  FL.flipped=false;
+}
+function flipCard(){
+  const fc=document.getElementById('flashcard');
+  FL.flipped=!FL.flipped;
+  fc.classList.toggle('flipped');
+  if(FL.flipped)document.getElementById('flash-btns').style.display='block';
+}
+function flashAnswer(ok){
+  if(!FL.flipped)return;
+  if(ok){FL.score++;toast('¡Excelente! +5 XP 🎉','good');}
+  else{toast('Sigue practicando 💪','bad');}
+  FL.idx++;
+  setTimeout(renderFlash,350);
+}
+
+/* ═══════════════════════════════════════════
+   FILL GAME
+═══════════════════════════════════════════ */
+let FI={};
+function initFill(){
+  document.getElementById('screen-fill').classList.add('active');
+  FI={items:shuffle(DATA.fill).slice(0,10),idx:0,score:0,answered:false};
+  renderFill();
+}
+function renderFill(){
+  if(FI.idx>=FI.items.length){endRound('fill',FI.score,FI.items.length);return;}
+  const it=FI.items[FI.idx];
+  const pct=Math.round(FI.idx/FI.items.length*100);
+  document.getElementById('fill-prog').style.width=pct+'%';
+  document.getElementById('fill-qlbl').textContent=(FI.idx+1)+' de '+FI.items.length;
+  document.getElementById('fill-slbl').textContent=FI.score+' correctas';
+  document.getElementById('fill-sentence').innerHTML=it.s.replace('___','<span class="blank">___</span>');
+  document.getElementById('fill-hint').textContent='🇩🇴 '+it.t;
+  document.getElementById('fill-explain').textContent='';
+  const opts=shuffle(it.o);
+  document.getElementById('fill-opts').innerHTML=opts.map(o=>`<div class="fill-opt" onclick="checkFill(this,'${o}','${it.b}','${it.x.replace(/'/g,"\\'")}','${it.s.replace(/'/g,"\\'")}')">${o}</div>`).join('');
+  FI.answered=false;
+}
+function checkFill(el,chosen,correct,explain,sentence){
+  if(FI.answered)return;
+  FI.answered=true;
+  document.querySelectorAll('.fill-opt').forEach(o=>o.classList.add('disabled'));
+  const filled=sentence.replace('___',`<span class="blank" style="color:var(--accent4);border-color:var(--accent4)">${correct}</span>`);
+  document.getElementById('fill-sentence').innerHTML=filled;
+  if(chosen===correct){
+    el.classList.add('correct');
+    FI.score++;
+    toast('¡Correcto! +7 XP ✓','good');
+  } else {
+    el.classList.add('wrong');
+    document.querySelectorAll('.fill-opt').forEach(o=>{if(o.textContent===correct)o.classList.add('reveal');});
+    toast('Era: '+correct,'bad',2400);
+  }
+  document.getElementById('fill-explain').textContent='💡 '+explain;
+  FI.idx++;
+  setTimeout(renderFill,2600);
+}
+
+/* ═══════════════════════════════════════════
+   SCRAMBLE GAME
+═══════════════════════════════════════════ */
+let SC={};
+function initScramble(){
+  document.getElementById('screen-scramble').classList.add('active');
+  SC={items:shuffle(DATA.scramble).slice(0,10),idx:0,score:0,letters:[],selected:[]};
+  renderScramble();
+}
+function renderScramble(){
+  if(SC.idx>=SC.items.length){endRound('scr',SC.score,SC.items.length);return;}
+  const it=SC.items[SC.idx];
+  const pct=Math.round(SC.idx/SC.items.length*100);
+  document.getElementById('scr-prog').style.width=pct+'%';
+  document.getElementById('scr-qlbl').textContent=(SC.idx+1)+' de '+SC.items.length;
+  document.getElementById('scr-slbl').textContent=SC.score+' correctas';
+  document.getElementById('scr-clue').textContent=it.c;
+  document.getElementById('scr-hint').textContent='💡 '+it.h;
+  document.getElementById('scr-fb').textContent='';
+  document.getElementById('scr-answer').className='answer-track';
+  SC.letters=shuffle(it.w.split(''));
+  SC.selected=[];
+  renderScrTiles();
+  renderScrAnswer();
+  document.getElementById('scr-check').disabled=true;
+}
+function renderScrTiles(){
+  document.getElementById('scr-tiles').innerHTML=SC.letters.map((l,i)=>`<div class="letter-tile${SC.selected.some(s=>s.i===i)?' used':''}" onclick="selLetter(${i})">${l}</div>`).join('');
+}
+function renderScrAnswer(){
+  const track=document.getElementById('scr-answer');
+  if(!SC.selected.length){track.innerHTML='<span style="color:var(--text3);font-size:13px">Toca las letras de abajo</span>';}
+  else{track.innerHTML=SC.selected.map((s,pos)=>`<div class="letter-tile answer-tile" onclick="unselLetter(${pos})">${SC.letters[s.i]}</div>`).join('');}
+  document.getElementById('scr-check').disabled=!SC.selected.length;
+}
+function selLetter(i){SC.selected.push({i});renderScrTiles();renderScrAnswer();}
+function unselLetter(pos){SC.selected.splice(pos,1);renderScrTiles();renderScrAnswer();}
+function clearScramble(){SC.selected=[];renderScrTiles();renderScrAnswer();}
+function checkScramble(){
+  const it=SC.items[SC.idx];
+  const answer=SC.selected.map(s=>SC.letters[s.i]).join('');
+  const track=document.getElementById('scr-answer');
+  const fb=document.getElementById('scr-fb');
+  if(answer===it.w){
+    track.classList.add('correct-anim');
+    SC.score++;
+    fb.style.color='var(--accent4)';
+    fb.textContent='✓ ¡Correcto! La palabra es: '+it.w;
+    toast('¡Increíble! +10 XP 🔥','good');
+  } else {
+    track.classList.add('wrong-anim');
+    fb.style.color='#f06080';
+    fb.textContent='✗ Era: '+it.w+' — ¡sigue intentando!';
+    toast('Era: '+it.w,'bad',2400);
+  }
+  SC.idx++;
+  setTimeout(()=>{track.className='answer-track';renderScramble();},2400);
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS SCREEN
+═══════════════════════════════════════════ */
+function renderProgress(){
+  const l=getLevel();const lvXP=getLvXP();
+  document.getElementById('pg-lvnum').textContent=l+1;
+  document.getElementById('pg-lvname').textContent=LEVELS[l].name;
+  document.getElementById('pg-xpbar').style.width=lvXP.pct+'%';
+  document.getElementById('pg-xpcur').textContent=ST.xp+' XP total';
+  document.getElementById('pg-xpnext').textContent=l+1<LEVELS.length?'Faltan '+(LEVELS[l+1].xp-ST.xp)+' XP':'¡Nivel máximo!';
+  document.getElementById('achieve-grid').innerHTML=ACHIEVEMENTS.map(a=>`<div class="achieve${a.cond(ST)?' earned':''}"><div class="achieve-icon">${a.icon}</div><div class="achieve-name">${a.name}</div></div>`).join('');
+  const s=ST.stats;
+  document.getElementById('flash-stat-sub').textContent=s.flash.rounds+' rondas completadas';
+  document.getElementById('flash-stat-pct').textContent=s.flash.total?Math.round(s.flash.correct/s.flash.total*100)+'%':'—';
+  document.getElementById('fill-stat-sub').textContent=s.fill.rounds+' rondas completadas';
+  document.getElementById('fill-stat-pct').textContent=s.fill.total?Math.round(s.fill.correct/s.fill.total*100)+'%':'—';
+  document.getElementById('scr-stat-sub').textContent=s.scr.rounds+' rondas completadas';
+  document.getElementById('scr-stat-pct').textContent=s.scr.total?Math.round(s.scr.correct/s.scr.total*100)+'%':'—';
+}
+
+/* ── Service Worker ── */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
