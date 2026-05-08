@@ -103,17 +103,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
 .btn-wrong{background:rgba(247,37,133,.1);color:#f06080;border:1px solid rgba(247,37,133,.2)}
 
 /* ── FILL BLANK ── */
-.fill-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:0 16px;font-size:17px;font-weight:600;line-height:1.9;text-align:center}
-.blank{display:inline-block;border-bottom:2px solid var(--accent);min-width:80px;text-align:center;color:var(--accent);font-weight:800;padding:0 6px}
-.fill-hint{padding:8px 16px;font-size:12px;color:var(--text3);text-align:center;font-style:italic}
-.fill-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px}
-.fill-opt{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 8px;text-align:center;font-weight:700;font-size:15px;cursor:pointer;transition:all .15s;touch-action:manipulation;font-family:var(--font)}
-.fill-opt:active{transform:scale(.96)}
+.fill-instruction{background:rgba(247,37,133,.08);border:1px solid rgba(247,37,133,.2);border-radius:12px;margin:0 16px 10px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.fill-instruction-icon{font-size:20px;flex-shrink:0}
+.fill-instruction-text{font-size:12px;color:var(--text2);line-height:1.4}
+.fill-instruction-text b{color:var(--text);display:block;margin-bottom:2px}
+.fill-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 18px;margin:0 16px;font-size:18px;font-weight:600;line-height:2;text-align:center}
+.blank{display:inline-block;border-bottom:3px solid var(--accent2);min-width:90px;text-align:center;color:var(--accent2);font-weight:900;padding:0 8px;font-size:20px;background:rgba(247,37,133,.06);border-radius:6px 6px 0 0}
+.blank.filled-correct{border-bottom-color:var(--accent4);color:var(--accent4);background:rgba(6,214,160,.08)}
+.blank.filled-wrong{border-bottom-color:#f06080;color:#f06080;background:rgba(247,37,133,.08)}
+.fill-hint{padding:8px 16px 4px;font-size:13px;color:var(--text2);text-align:center;font-style:normal;font-weight:600}
+.fill-choose-label{padding:4px 16px 6px;font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.fill-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px}
+.fill-opt{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:16px 10px;text-align:center;font-weight:800;font-size:16px;cursor:pointer;transition:all .15s;touch-action:manipulation;font-family:var(--font);color:var(--text);position:relative}
+.fill-opt:active:not(.disabled){transform:scale(.95)}
+.fill-opt:hover:not(.disabled){border-color:rgba(247,37,133,.4);background:rgba(247,37,133,.06)}
 .fill-opt.correct{background:rgba(6,214,160,.15);border-color:var(--accent4);color:var(--accent4)}
+.fill-opt.correct::after{content:'✓';position:absolute;top:6px;right:10px;font-size:14px}
 .fill-opt.wrong{background:rgba(247,37,133,.1);border-color:#f06080;color:#f06080}
-.fill-opt.reveal{background:rgba(6,214,160,.08);border-color:rgba(6,214,160,.3);color:var(--accent4)}
-.fill-opt.disabled{pointer-events:none;opacity:.45}
-.fill-explain{padding:6px 16px 10px;font-size:12px;color:var(--text2);text-align:center;line-height:1.5}
+.fill-opt.wrong::after{content:'✗';position:absolute;top:6px;right:10px;font-size:14px}
+.fill-opt.reveal{background:rgba(6,214,160,.08);border-color:rgba(6,214,160,.4);color:var(--accent4)}
+.fill-opt.reveal::after{content:'✓';position:absolute;top:6px;right:10px;font-size:14px;color:var(--accent4)}
+.fill-opt.disabled{pointer-events:none;opacity:.5}
+.fill-explain{margin:8px 16px 4px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;font-size:12px;color:var(--text2);text-align:left;line-height:1.6}
 
 /* ── SCRAMBLE ── */
 .scramble-tiles-wrap{padding:0 16px}
@@ -176,6 +187,32 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
 .ms-name{font-size:13px;font-weight:700}
 .ms-sub{font-size:11px;color:var(--text3)}
 .ms-score{font-weight:800;font-size:15px;color:var(--accent4);flex-shrink:0}
+
+/* ── TRANSLATOR ── */
+.tr-wrap{padding:16px}
+.tr-direction{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;margin-bottom:14px;gap:4px}
+.tr-lang-btn{flex:1;padding:10px;border-radius:12px;border:none;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;background:none;color:var(--text2);touch-action:manipulation}
+.tr-lang-btn.active{background:var(--accent);color:#fff}
+.tr-swap{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:8px;touch-action:manipulation}
+.tr-input-wrap{position:relative;margin-bottom:12px}
+.tr-input{width:100%;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:14px 48px 14px 16px;font-size:16px;font-family:var(--font);color:var(--text);outline:none;transition:border-color .2s;resize:none}
+.tr-input:focus{border-color:var(--accent)}
+.tr-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;touch-action:manipulation}
+.tr-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;touch-action:manipulation;margin-bottom:14px}
+.tr-btn:active{transform:scale(.98)}
+.tr-btn:disabled{opacity:.4}
+.tr-result-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;min-height:80px;display:none}
+.tr-result-box.show{display:block}
+.tr-result-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.tr-result-text{font-size:20px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:8px}
+.tr-result-pron{font-size:13px;color:var(--accent4);font-weight:600;margin-bottom:6px}
+.tr-result-note{font-size:12px;color:var(--text2);line-height:1.5;border-top:1px solid var(--border);padding-top:8px;margin-top:8px}
+.tr-no-result{font-size:14px;color:var(--text3);text-align:center;padding:16px 0}
+.tr-quick-wrap{margin-top:16px}
+.tr-quick-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.tr-quick-grid{display:flex;flex-wrap:wrap;gap:8px}
+.tr-chip{background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;touch-action:manipulation;color:var(--text2)}
+.tr-chip:active{transform:scale(.95);background:var(--surface2)}
 </style>
 </head>
 <body>
@@ -186,7 +223,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   <div class="hero">
     <div class="hero-glow1"></div>
     <div class="hero-glow2"></div>
-    <div class="app-title">InglésYa!</div>
+    <div class="app-title">InglésYa! 🇩🇴</div>
     <div class="app-subtitle">Tu camino al inglés — ¡un juego a la vez!</div>
     <div class="stats-row">
       <div class="stat-pill gold"><i class="fa-solid fa-bolt"></i><b id="home-xp">0</b> XP</div>
@@ -289,19 +326,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   <div class="game-header">
     <button class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="game-mode-title">Completa la oración</div>
-    <div class="xp-badge" id="fill-xp-badge">+7 XP/correcta</div>
+    <div class="xp-badge">+7 XP/correcta</div>
   </div>
   <div class="prog-wrap">
     <div class="prog-track"><div class="prog-fill" id="fill-prog" style="width:0%"></div></div>
     <div class="prog-labels"><span id="fill-qlbl">1 de 10</span><span id="fill-slbl">0 correctas</span></div>
   </div>
-  <div class="q-area">
-    <div class="q-prompt">Escoge la palabra que completa la oración:</div>
+  <div class="fill-instruction">
+    <div class="fill-instruction-icon">💡</div>
+    <div class="fill-instruction-text">
+      <b>¿Cómo se juega?</b>
+      Lee la oración en inglés. La parte <span style="color:var(--accent2);font-weight:700">rosa</span> está vacía — toca el botón con la palabra correcta.
+    </div>
   </div>
   <div class="fill-card" id="fill-sentence">—</div>
-  <div class="fill-hint" id="fill-hint">—</div>
+  <div class="fill-hint" id="fill-hint"></div>
+  <div class="fill-choose-label">👇 Elige la palabra correcta</div>
   <div class="fill-options" id="fill-opts"></div>
-  <div class="fill-explain" id="fill-explain"></div>
+  <div class="fill-explain" id="fill-explain" style="display:none"></div>
 </div>
 
 <!-- SCRAMBLE GAME -->
@@ -366,6 +408,36 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   </div>
 </div>
 
+<!-- TRANSLATOR SCREEN -->
+<div class="screen" id="screen-translate">
+  <div class="game-header" style="position:relative">
+    <div class="game-mode-title" style="font-size:17px">🔤 Traductor</div>
+  </div>
+  <div class="tr-wrap">
+    <div class="tr-direction">
+      <button class="tr-lang-btn active" id="tr-btn-es" onclick="setTrDir('es-en')">🇩🇴 Español → Inglés</button>
+      <button class="tr-swap" onclick="swapTrDir()" title="Invertir"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+      <button class="tr-lang-btn" id="tr-btn-en" onclick="setTrDir('en-es')">🇺🇸 Inglés → Español</button>
+    </div>
+    <div class="tr-input-wrap">
+      <textarea class="tr-input" id="tr-input" rows="2" placeholder="Escribe una palabra o frase..." oninput="onTrInput()"></textarea>
+      <button class="tr-clear" id="tr-clear-btn" onclick="clearTr()" style="display:none"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <button class="tr-btn" id="tr-go-btn" onclick="doTranslate()">Traducir <i class="fa-solid fa-language"></i></button>
+    <div class="tr-result-box" id="tr-result">
+      <div class="tr-result-label" id="tr-result-label">Traducción</div>
+      <div class="tr-result-text" id="tr-result-text"></div>
+      <div class="tr-result-pron" id="tr-result-pron"></div>
+      <div class="tr-result-note" id="tr-result-note"></div>
+      <div class="tr-no-result" id="tr-no-result" style="display:none"></div>
+    </div>
+    <div class="tr-quick-wrap">
+      <div class="tr-quick-label">Palabras comunes</div>
+      <div class="tr-quick-grid" id="tr-quick-chips"></div>
+    </div>
+  </div>
+</div>
+
 </div><!-- end #app -->
 
 <!-- TOAST -->
@@ -385,6 +457,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-home" onclick="showNav('home')">
     <i class="fa-solid fa-house"></i>Inicio
+  </button>
+  <button class="nav-btn" id="nav-translate" onclick="showNav('translate')">
+    <i class="fa-solid fa-language"></i>Traductor
   </button>
   <button class="nav-btn" id="nav-progress" onclick="showNav('progress')">
     <i class="fa-solid fa-chart-line"></i>Progreso
@@ -680,6 +755,7 @@ function showNav(name){
   document.getElementById('app').scrollTop=0;
   if(name==='home')renderHome();
   if(name==='progress')renderProgress();
+  if(name==='translate')renderTranslate();
 }
 function goHome(){showNav('home');}
 function startGame(mode){
@@ -778,7 +854,7 @@ function flashAnswer(ok){
 }
 
 /* ═══════════════════════════════════════════
-   FILL GAME
+   FILL GAME  — fixed: uses data attributes
 ═══════════════════════════════════════════ */
 let FI={};
 function initFill(){
@@ -793,31 +869,56 @@ function renderFill(){
   document.getElementById('fill-prog').style.width=pct+'%';
   document.getElementById('fill-qlbl').textContent=(FI.idx+1)+' de '+FI.items.length;
   document.getElementById('fill-slbl').textContent=FI.score+' correctas';
-  document.getElementById('fill-sentence').innerHTML=it.s.replace('___','<span class="blank">___</span>');
-  document.getElementById('fill-hint').textContent='🇩🇴 '+it.t;
-  document.getElementById('fill-explain').textContent='';
+  // Build sentence with styled blank
+  document.getElementById('fill-sentence').innerHTML=
+    it.s.replace('___','<span class="blank" id="fill-blank">_____</span>');
+  document.getElementById('fill-hint').textContent='🇩🇴 En español: '+it.t;
+  const exEl=document.getElementById('fill-explain');
+  exEl.style.display='none';exEl.textContent='';
+  // Build option buttons using data attributes — no inline JS strings
   const opts=shuffle(it.o);
-  document.getElementById('fill-opts').innerHTML=opts.map(o=>`<div class="fill-opt" onclick="checkFill(this,'${o}','${it.b}','${it.x.replace(/'/g,"\\'")}','${it.s.replace(/'/g,"\\'")}')">${o}</div>`).join('');
+  const container=document.getElementById('fill-opts');
+  container.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='fill-opt';
+    btn.textContent=o;
+    btn.dataset.choice=o;
+    btn.addEventListener('click',function(){pickFill(this);});
+    container.appendChild(btn);
+  });
   FI.answered=false;
 }
-function checkFill(el,chosen,correct,explain,sentence){
+function pickFill(btn){
   if(FI.answered)return;
   FI.answered=true;
-  document.querySelectorAll('.fill-opt').forEach(o=>o.classList.add('disabled'));
-  const filled=sentence.replace('___',`<span class="blank" style="color:var(--accent4);border-color:var(--accent4)">${correct}</span>`);
-  document.getElementById('fill-sentence').innerHTML=filled;
-  if(chosen===correct){
-    el.classList.add('correct');
+  const chosen=btn.dataset.choice;
+  const it=FI.items[FI.idx];
+  // Disable all options
+  document.querySelectorAll('.fill-opt').forEach(o=>{o.classList.add('disabled');o.removeEventListener('click',pickFill);});
+  // Update blank in sentence
+  const blankEl=document.getElementById('fill-blank');
+  if(blankEl){
+    blankEl.textContent=it.b;
+    blankEl.classList.add(chosen===it.b?'filled-correct':'filled-wrong');
+  }
+  if(chosen===it.b){
+    btn.classList.add('correct');
     FI.score++;
     toast('¡Correcto! +7 XP ✓','good');
   } else {
-    el.classList.add('wrong');
-    document.querySelectorAll('.fill-opt').forEach(o=>{if(o.textContent===correct)o.classList.add('reveal');});
-    toast('Era: '+correct,'bad',2400);
+    btn.classList.add('wrong');
+    // Highlight correct answer
+    document.querySelectorAll('.fill-opt').forEach(o=>{
+      if(o.dataset.choice===it.b) o.classList.add('reveal');
+    });
+    toast('Era: "'+it.b+'"','bad',2400);
   }
-  document.getElementById('fill-explain').textContent='💡 '+explain;
+  const exEl=document.getElementById('fill-explain');
+  exEl.textContent='💡 '+it.x;
+  exEl.style.display='block';
   FI.idx++;
-  setTimeout(renderFill,2600);
+  setTimeout(renderFill,2700);
 }
 
 /* ═══════════════════════════════════════════
@@ -897,6 +998,147 @@ function renderProgress(){
   document.getElementById('fill-stat-pct').textContent=s.fill.total?Math.round(s.fill.correct/s.fill.total*100)+'%':'—';
   document.getElementById('scr-stat-sub').textContent=s.scr.rounds+' rondas completadas';
   document.getElementById('scr-stat-pct').textContent=s.scr.total?Math.round(s.scr.correct/s.scr.total*100)+'%':'—';
+}
+
+/* ═══════════════════════════════════════════
+   TRANSLATOR
+   — offline dictionary built from word bank
+   — covers all flash words + common phrases
+═══════════════════════════════════════════ */
+const TR_DICT = buildTrDict();
+function buildTrDict(){
+  const esEn={}, enEs={};
+  // Pull from flash data
+  DATA.flash.forEach(it=>{
+    const esKey=it.es.toLowerCase().trim();
+    const enKey=it.en.toLowerCase().trim();
+    esEn[esKey]={tr:it.en,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
+    enEs[enKey]={tr:it.es,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
+    // Also index slash-separated variants
+    it.es.split('/').forEach(v=>{const k=v.trim().toLowerCase();if(k)esEn[k]={tr:it.en,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};});
+    it.en.split('/').forEach(v=>{const k=v.trim().toLowerCase();if(k)enEs[k]={tr:it.es,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};});
+  });
+  // Extra common phrases
+  const extras_esEn=[
+    ['¿cuánto cuesta?','How much does it cost?','[jáu moch doz it kost]','Para preguntar el precio de algo'],
+    ['no entiendo','I don\'t understand','[ai dont on-der-stand]','Muy útil cuando alguien habla rápido'],
+    ['no hablo inglés','I don\'t speak English','[ai dont spiik íng-lish]','Para explicar tu nivel de inglés'],
+    ['¿puede repetir?','Can you repeat that?','[kan yu ri-píit dat]','Para pedir que repitan algo'],
+    ['¿dónde está el baño?','Where is the bathroom?','[wér iz de báz-rum]','Pregunta esencial en cualquier lugar'],
+    ['¿cuánto es?','How much is it?','[jáu moch iz it]','Versión corta para el precio'],
+    ['me llamo','My name is','[mai neim iz]','Para presentarte'],
+    ['¿cómo te llamas?','What is your name?','[wot iz yor neim]','Para preguntar el nombre'],
+    ['buenos días','Good morning','[gud mór-ning]','Saludo de la mañana'],
+    ['por favor','Please','[pliiz]','Siempre sé educado'],
+    ['gracias','Thank you','[zank yu]','Para agradecer formalmente'],
+    ['de nada','You\'re welcome','[yor wél-kom]','Respuesta al agradecimiento'],
+    ['disculpe','Excuse me','[eks-kiúuz mi]','Para llamar la atención de alguien'],
+    ['lo siento','I\'m sorry','[aim só-ri]','Para disculparte'],
+    ['no sé','I don\'t know','[ai dont nóu]','Cuando no sabes la respuesta'],
+    ['¿habla español?','Do you speak Spanish?','[du yu spiik spá-nish]','Para encontrar a alguien que te entienda'],
+    ['necesito ayuda','I need help','[ai niid jelp]','Para pedir asistencia'],
+    ['¿dónde está...?','Where is...?','[wér iz]','Para preguntar una dirección'],
+    ['llame a la policía','Call the police','[kol de po-líis]','En caso de emergencia'],
+    ['vivo en','I live in','[ai liv in]','Para decir dónde vives'],
+    ['trabajo en','I work at','[ai wérk at]','Para decir dónde trabajas'],
+    ['tengo hambre','I am hungry','[ai am jón-gri]','Cuando quieres comer'],
+    ['tengo sed','I am thirsty','[ai am zérsti]','Cuando quieres tomar'],
+    ['estoy cansado','I am tired','[ai am táierd]','Cuando necesitas descansar'],
+    ['me duele','It hurts / I have pain','[it jérts]','Para explicar un dolor'],
+  ];
+  extras_esEn.forEach(([es,en,pron,note])=>{
+    esEn[es.toLowerCase()]={tr:en,pron,note,emoji:'💬'};
+  });
+  const extras_enEs=[
+    ['how much','¿Cuánto cuesta?','[jáu moch]','Para preguntar el precio'],
+    ['i don\'t understand','No entiendo','[ai dont on-der-stand]',''],
+    ['where is','¿Dónde está...?','[wér iz]','Para pedir direcciones'],
+    ['my name is','Me llamo...','[mai neim iz]','Para presentarte'],
+    ['please','Por favor','[pliiz]','Siempre úsalo al pedir algo'],
+    ['thank you','Gracias','[zank yu]','Agradecimiento'],
+    ['you\'re welcome','De nada','[yor wél-kom]','Respuesta al "thank you"'],
+    ['excuse me','Disculpe / Perdón','[eks-kiúuz mi]','Para llamar la atención'],
+    ['i\'m sorry','Lo siento','[aim só-ri]','Para pedir disculpas'],
+    ['i need help','Necesito ayuda','[ai niid jelp]','Para pedir asistencia'],
+    ['call the police','Llame a la policía','[kol de po-líis]','Emergencia'],
+    ['i am hungry','Tengo hambre','[ai am jón-gri]',''],
+    ['i am tired','Estoy cansado/a','[ai am táierd]',''],
+    ['it hurts','Me duele','[it jérts]','Dolor'],
+    ['good morning','Buenos días','[gud mór-ning]','Saludo matutino'],
+    ['good night','Buenas noches','[gud náit]','Despedida nocturna'],
+  ];
+  extras_enEs.forEach(([en,es,pron,note])=>{
+    enEs[en.toLowerCase()]={tr:es,pron,note,emoji:'💬'};
+  });
+  return{esEn,enEs};
+}
+
+let TR_DIR='es-en';
+const TR_QUICK_ES=['Hola','Gracias','Agua','Trabajo','Casa','Familia','Dinero','Ayuda','Por favor','Médico'];
+const TR_QUICK_EN=['Hello','Work','Money','Please','Family','Doctor','Food','Help','Yes','No'];
+
+function renderTranslate(){
+  renderTrChips();
+}
+function renderTrChips(){
+  const chips=TR_DIR==='es-en'?TR_QUICK_ES:TR_QUICK_EN;
+  document.getElementById('tr-quick-chips').innerHTML=chips.map(w=>`<span class="tr-chip" onclick="trChip('${w}')">${w}</span>`).join('');
+}
+function setTrDir(dir){
+  TR_DIR=dir;
+  document.getElementById('tr-btn-es').classList.toggle('active',dir==='es-en');
+  document.getElementById('tr-btn-en').classList.toggle('active',dir==='en-es');
+  document.getElementById('tr-input').value='';
+  document.getElementById('tr-result').classList.remove('show');
+  document.getElementById('tr-clear-btn').style.display='none';
+  renderTrChips();
+}
+function swapTrDir(){setTrDir(TR_DIR==='es-en'?'en-es':'es-en');}
+function onTrInput(){
+  const v=document.getElementById('tr-input').value.trim();
+  document.getElementById('tr-clear-btn').style.display=v?'inline-flex':'none';
+}
+function clearTr(){
+  document.getElementById('tr-input').value='';
+  document.getElementById('tr-clear-btn').style.display='none';
+  document.getElementById('tr-result').classList.remove('show');
+}
+function trChip(word){
+  document.getElementById('tr-input').value=word;
+  document.getElementById('tr-clear-btn').style.display='inline-flex';
+  doTranslate();
+}
+function doTranslate(){
+  const raw=document.getElementById('tr-input').value.trim();
+  if(!raw)return;
+  const key=raw.toLowerCase();
+  const dict=TR_DIR==='es-en'?TR_DICT.esEn:TR_DICT.enEs;
+  const fromLang=TR_DIR==='es-en'?'Español':'English';
+  const toLang=TR_DIR==='es-en'?'English':'Español';
+  const resBox=document.getElementById('tr-result');
+  const noRes=document.getElementById('tr-no-result');
+  document.getElementById('tr-result-label').textContent=fromLang+' → '+toLang;
+  // Try exact match, then partial
+  let found=dict[key];
+  if(!found){
+    // partial: find any key that starts with the input or vice versa
+    const k=Object.keys(dict).find(k=>k.startsWith(key)||key.startsWith(k));
+    if(k)found=dict[k];
+  }
+  resBox.classList.add('show');
+  if(found){
+    noRes.style.display='none';
+    document.getElementById('tr-result-text').textContent=(found.emoji?' '+found.emoji+' ':'')+found.tr;
+    document.getElementById('tr-result-pron').textContent=found.pron||'';
+    document.getElementById('tr-result-note').textContent=found.note||'';
+    document.getElementById('tr-result-note').style.display=found.note?'block':'none';
+  } else {
+    document.getElementById('tr-result-text').textContent='';
+    document.getElementById('tr-result-pron').textContent='';
+    document.getElementById('tr-result-note').textContent='';
+    noRes.style.display='block';
+    noRes.textContent='No encontré "'+raw+'" en el diccionario. Prueba con otra palabra o usa palabras simples.';
+  }
 }
 
 /* ── Service Worker ── */
