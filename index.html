@@ -415,15 +415,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   </div>
   <div class="tr-wrap">
     <div class="tr-direction">
-      <button class="tr-lang-btn active" id="tr-btn-es" onclick="setTrDir('es-en')">🇩🇴 Español → Inglés</button>
-      <button class="tr-swap" onclick="swapTrDir()" title="Invertir"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
-      <button class="tr-lang-btn" id="tr-btn-en" onclick="setTrDir('en-es')">🇺🇸 Inglés → Español</button>
+      <button class="tr-lang-btn active" id="tr-btn-es">🇩🇴 Español → Inglés</button>
+      <button class="tr-swap" title="Invertir"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+      <button class="tr-lang-btn" id="tr-btn-en">🇺🇸 Inglés → Español</button>
     </div>
     <div class="tr-input-wrap">
-      <textarea class="tr-input" id="tr-input" rows="2" placeholder="Escribe una palabra o frase..." oninput="onTrInput()"></textarea>
-      <button class="tr-clear" id="tr-clear-btn" onclick="clearTr()" style="display:none"><i class="fa-solid fa-xmark"></i></button>
+      <textarea class="tr-input" id="tr-input" rows="2" placeholder="Escribe una palabra o frase..."></textarea>
+      <button class="tr-clear" id="tr-clear-btn" style="display:none"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <button class="tr-btn" id="tr-go-btn" onclick="doTranslate()">Traducir <i class="fa-solid fa-language"></i></button>
+    <button class="tr-btn" id="tr-go-btn">Traducir <i class="fa-solid fa-language"></i></button>
     <div class="tr-result-box" id="tr-result">
       <div class="tr-result-label" id="tr-result-label">Traducción</div>
       <div class="tr-result-text" id="tr-result-text"></div>
@@ -1008,15 +1008,15 @@ function renderProgress(){
 const TR_DICT = buildTrDict();
 function buildTrDict(){
   const esEn={}, enEs={};
-  // Pull from flash data
+  // Pull from flash data — all keys normalized (no accents, lowercase)
   DATA.flash.forEach(it=>{
-    const esKey=it.es.toLowerCase().trim();
-    const enKey=it.en.toLowerCase().trim();
-    esEn[esKey]={tr:it.en,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
-    enEs[enKey]={tr:it.es,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
-    // Also index slash-separated variants
-    it.es.split('/').forEach(v=>{const k=v.trim().toLowerCase();if(k)esEn[k]={tr:it.en,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};});
-    it.en.split('/').forEach(v=>{const k=v.trim().toLowerCase();if(k)enEs[k]={tr:it.es,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};});
+    const val_es={tr:it.en,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
+    const val_en={tr:it.es,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
+    esEn[norm(it.es)]=val_es;
+    enEs[norm(it.en)]=val_en;
+    // Also index slash-separated variants (e.g. "mamá / madre" → both keys)
+    it.es.split('/').forEach(v=>{const k=norm(v);if(k)esEn[k]=val_es;});
+    it.en.split('/').forEach(v=>{const k=norm(v);if(k)enEs[k]=val_en;});
   });
   // Extra common phrases
   const extras_esEn=[
@@ -1047,7 +1047,9 @@ function buildTrDict(){
     ['me duele','It hurts / I have pain','[it jérts]','Para explicar un dolor'],
   ];
   extras_esEn.forEach(([es,en,pron,note])=>{
-    esEn[es.toLowerCase()]={tr:en,pron,note,emoji:'💬'};
+    esEn[norm(es)]={tr:en,pron,note,emoji:'💬'};
+    // also index each word individually for single-word searches
+    es.split(' ').forEach(w=>{const k=norm(w);if(k.length>2&&!esEn[k])esEn[k]={tr:en,pron,note,emoji:'💬'};});
   });
   const extras_enEs=[
     ['how much','¿Cuánto cuesta?','[jáu moch]','Para preguntar el precio'],
@@ -1068,21 +1070,60 @@ function buildTrDict(){
     ['good night','Buenas noches','[gud náit]','Despedida nocturna'],
   ];
   extras_enEs.forEach(([en,es,pron,note])=>{
-    enEs[en.toLowerCase()]={tr:es,pron,note,emoji:'💬'};
+    enEs[norm(en)]={tr:es,pron,note,emoji:'💬'};
+    en.split(' ').forEach(w=>{const k=norm(w);if(k.length>2&&!enEs[k])enEs[k]={tr:es,pron,note,emoji:'💬'};});
   });
   return{esEn,enEs};
 }
 
+/* Normalize: lowercase + strip accents so "si"/"sí", "como"/"cómo" all match */
+function norm(s){
+  return s.toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[¿¡]/g,'');
+}
+
 let TR_DIR='es-en';
-const TR_QUICK_ES=['Hola','Gracias','Agua','Trabajo','Casa','Familia','Dinero','Ayuda','Por favor','Médico'];
-const TR_QUICK_EN=['Hello','Work','Money','Please','Family','Doctor','Food','Help','Yes','No'];
+const TR_QUICK_ES=['Hola','Gracias','Agua','Trabajo','Casa','Familia','Dinero','Ayuda','Por favor','Médico','Sí','No','Carro','Baño','Comer'];
+const TR_QUICK_EN=['Hello','Work','Money','Please','Family','Doctor','Food','Help','Yes','No','Car','Bathroom','Buy','Eat','Sorry'];
+
+/* Wire up translator UI via addEventListener (required for GitHub Pages CSP) */
+document.addEventListener('DOMContentLoaded',function(){
+  const inp=document.getElementById('tr-input');
+  const clrBtn=document.getElementById('tr-clear-btn');
+  const goBtn=document.getElementById('tr-go-btn');
+  const btnEs=document.getElementById('tr-btn-es');
+  const btnEn=document.getElementById('tr-btn-en');
+  const swapBtn=document.querySelector('.tr-swap');
+  if(inp){
+    inp.addEventListener('input',function(){
+      clrBtn.style.display=inp.value.trim()?'inline-flex':'none';
+    });
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doTranslate();}
+    });
+  }
+  if(clrBtn) clrBtn.addEventListener('click',clearTr);
+  if(goBtn)  goBtn.addEventListener('click',doTranslate);
+  if(btnEs)  btnEs.addEventListener('click',function(){setTrDir('es-en');});
+  if(btnEn)  btnEn.addEventListener('click',function(){setTrDir('en-es');});
+  if(swapBtn)swapBtn.addEventListener('click',swapTrDir);
+});
 
 function renderTranslate(){
   renderTrChips();
 }
 function renderTrChips(){
   const chips=TR_DIR==='es-en'?TR_QUICK_ES:TR_QUICK_EN;
-  document.getElementById('tr-quick-chips').innerHTML=chips.map(w=>`<span class="tr-chip" onclick="trChip('${w}')">${w}</span>`).join('');
+  const grid=document.getElementById('tr-quick-chips');
+  grid.innerHTML='';
+  chips.forEach(w=>{
+    const chip=document.createElement('span');
+    chip.className='tr-chip';
+    chip.textContent=w;
+    chip.addEventListener('click',function(){trChip(w);});
+    grid.appendChild(chip);
+  });
 }
 function setTrDir(dir){
   TR_DIR=dir;
@@ -1091,13 +1132,11 @@ function setTrDir(dir){
   document.getElementById('tr-input').value='';
   document.getElementById('tr-result').classList.remove('show');
   document.getElementById('tr-clear-btn').style.display='none';
+  const inp=document.getElementById('tr-input');
+  inp.placeholder=dir==='es-en'?'Escribe en español...':'Type in English...';
   renderTrChips();
 }
 function swapTrDir(){setTrDir(TR_DIR==='es-en'?'en-es':'es-en');}
-function onTrInput(){
-  const v=document.getElementById('tr-input').value.trim();
-  document.getElementById('tr-clear-btn').style.display=v?'inline-flex':'none';
-}
 function clearTr(){
   document.getElementById('tr-input').value='';
   document.getElementById('tr-clear-btn').style.display='none';
@@ -1111,33 +1150,39 @@ function trChip(word){
 function doTranslate(){
   const raw=document.getElementById('tr-input').value.trim();
   if(!raw)return;
-  const key=raw.toLowerCase();
+  const key=norm(raw);
   const dict=TR_DIR==='es-en'?TR_DICT.esEn:TR_DICT.enEs;
-  const fromLang=TR_DIR==='es-en'?'Español':'English';
-  const toLang=TR_DIR==='es-en'?'English':'Español';
+  const fromLang=TR_DIR==='es-en'?'🇩🇴 Español':'🇺🇸 English';
+  const toLang=TR_DIR==='es-en'?'🇺🇸 English':'🇩🇴 Español';
   const resBox=document.getElementById('tr-result');
   const noRes=document.getElementById('tr-no-result');
   document.getElementById('tr-result-label').textContent=fromLang+' → '+toLang;
-  // Try exact match, then partial
+  // 1. Exact normalized match
   let found=dict[key];
+  // 2. Partial: key starts with input or input starts with key
   if(!found){
-    // partial: find any key that starts with the input or vice versa
-    const k=Object.keys(dict).find(k=>k.startsWith(key)||key.startsWith(k));
-    if(k)found=dict[k];
+    const match=Object.keys(dict).find(k=>k.startsWith(key)||key.startsWith(k));
+    if(match)found=dict[match];
+  }
+  // 3. Fuzzy: any key that contains the input word
+  if(!found){
+    const match=Object.keys(dict).find(k=>k.includes(key)||key.includes(k));
+    if(match)found=dict[match];
   }
   resBox.classList.add('show');
   if(found){
     noRes.style.display='none';
-    document.getElementById('tr-result-text').textContent=(found.emoji?' '+found.emoji+' ':'')+found.tr;
-    document.getElementById('tr-result-pron').textContent=found.pron||'';
-    document.getElementById('tr-result-note').textContent=found.note||'';
-    document.getElementById('tr-result-note').style.display=found.note?'block':'none';
+    document.getElementById('tr-result-text').textContent=(found.emoji?found.emoji+' ':'')+found.tr;
+    document.getElementById('tr-result-pron').textContent=found.pron?'🔊 '+found.pron:'';
+    const noteEl=document.getElementById('tr-result-note');
+    noteEl.textContent=found.note||'';
+    noteEl.style.display=found.note?'block':'none';
   } else {
     document.getElementById('tr-result-text').textContent='';
     document.getElementById('tr-result-pron').textContent='';
-    document.getElementById('tr-result-note').textContent='';
+    document.getElementById('tr-result-note').style.display='none';
     noRes.style.display='block';
-    noRes.textContent='No encontré "'+raw+'" en el diccionario. Prueba con otra palabra o usa palabras simples.';
+    noRes.textContent='No encontré "'+raw+'". Prueba con palabras simples como "agua", "trabajo", "casa".';
   }
 }
 
