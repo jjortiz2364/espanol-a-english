@@ -1005,6 +1005,14 @@ function renderProgress(){
    — offline dictionary built from word bank
    — covers all flash words + common phrases
 ═══════════════════════════════════════════ */
+
+/* norm() MUST be defined before buildTrDict() calls it */
+function norm(s){
+  return s.toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[¿¡]/g,'');
+}
+
 const TR_DICT = buildTrDict();
 function buildTrDict(){
   const esEn={}, enEs={};
@@ -1071,13 +1079,6 @@ function buildTrDict(){
     enEs[norm(en)]={tr:es,pron,note,emoji:'💬'};
   });
   return{esEn,enEs};
-}
-
-/* Normalize: lowercase + strip accents so "si"/"sí", "como"/"cómo" all match */
-function norm(s){
-  return s.toLowerCase().trim()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[¿¡]/g,'');
 }
 
 let TR_DIR='es-en';
