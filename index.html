@@ -1048,8 +1048,6 @@ function buildTrDict(){
   ];
   extras_esEn.forEach(([es,en,pron,note])=>{
     esEn[norm(es)]={tr:en,pron,note,emoji:'💬'};
-    // also index each word individually for single-word searches
-    es.split(' ').forEach(w=>{const k=norm(w);if(k.length>2&&!esEn[k])esEn[k]={tr:en,pron,note,emoji:'💬'};});
   });
   const extras_enEs=[
     ['how much','¿Cuánto cuesta?','[jáu moch]','Para preguntar el precio'],
@@ -1071,7 +1069,6 @@ function buildTrDict(){
   ];
   extras_enEs.forEach(([en,es,pron,note])=>{
     enEs[norm(en)]={tr:es,pron,note,emoji:'💬'};
-    en.split(' ').forEach(w=>{const k=norm(w);if(k.length>2&&!enEs[k])enEs[k]={tr:es,pron,note,emoji:'💬'};});
   });
   return{esEn,enEs};
 }
@@ -1157,18 +1154,10 @@ function doTranslate(){
   const resBox=document.getElementById('tr-result');
   const noRes=document.getElementById('tr-no-result');
   document.getElementById('tr-result-label').textContent=fromLang+' → '+toLang;
-  // 1. Exact normalized match
-  let found=dict[key];
-  // 2. Partial: key starts with input or input starts with key
-  if(!found){
-    const match=Object.keys(dict).find(k=>k.startsWith(key)||key.startsWith(k));
-    if(match)found=dict[match];
-  }
-  // 3. Fuzzy: any key that contains the input word
-  if(!found){
-    const match=Object.keys(dict).find(k=>k.includes(key)||key.includes(k));
-    if(match)found=dict[match];
-  }
+
+  // Exact normalized match only — no fuzzy/partial (causes wrong results)
+  const found=dict[key];
+
   resBox.classList.add('show');
   if(found){
     noRes.style.display='none';
@@ -1182,7 +1171,7 @@ function doTranslate(){
     document.getElementById('tr-result-pron').textContent='';
     document.getElementById('tr-result-note').style.display='none';
     noRes.style.display='block';
-    noRes.textContent='No encontré "'+raw+'". Prueba con palabras simples como "agua", "trabajo", "casa".';
+    noRes.textContent='No encontré "'+raw+'". Prueba con palabras simples como "agua", "trabajo" o "sí".';
   }
 }
 
