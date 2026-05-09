@@ -1001,101 +1001,479 @@ function renderProgress(){
 }
 
 /* ═══════════════════════════════════════════
-   TRANSLATOR
-   — offline dictionary built from word bank
-   — covers all flash words + common phrases
+   TRANSLATOR — 500+ entry hardcoded dictionary
+   Uses var + IIFE for reliable global scope
 ═══════════════════════════════════════════ */
-
-/* norm() MUST be defined before buildTrDict() calls it */
 function norm(s){
   return s.toLowerCase().trim()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[¿¡]/g,'');
+    .replace(/[¿¡]/g,'').replace(/\s+/g,' ');
 }
 
-const TR_DICT = buildTrDict();
-function buildTrDict(){
-  const esEn={}, enEs={};
-  // Pull from flash data — all keys normalized (no accents, lowercase)
-  DATA.flash.forEach(it=>{
-    const val_es={tr:it.en,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
-    const val_en={tr:it.es,pron:it.pron,note:'Categoría: '+it.cat,emoji:it.emoji};
-    esEn[norm(it.es)]=val_es;
-    enEs[norm(it.en)]=val_en;
-    // Also index slash-separated variants (e.g. "mamá / madre" → both keys)
-    it.es.split('/').forEach(v=>{const k=norm(v);if(k)esEn[k]=val_es;});
-    it.en.split('/').forEach(v=>{const k=norm(v);if(k)enEs[k]=val_en;});
-  });
-  // Extra common phrases
-  const extras_esEn=[
-    ['¿cuánto cuesta?','How much does it cost?','[jáu moch doz it kost]','Para preguntar el precio de algo'],
-    ['no entiendo','I don\'t understand','[ai dont on-der-stand]','Muy útil cuando alguien habla rápido'],
-    ['no hablo inglés','I don\'t speak English','[ai dont spiik íng-lish]','Para explicar tu nivel de inglés'],
-    ['¿puede repetir?','Can you repeat that?','[kan yu ri-píit dat]','Para pedir que repitan algo'],
-    ['¿dónde está el baño?','Where is the bathroom?','[wér iz de báz-rum]','Pregunta esencial en cualquier lugar'],
-    ['¿cuánto es?','How much is it?','[jáu moch iz it]','Versión corta para el precio'],
-    ['me llamo','My name is','[mai neim iz]','Para presentarte'],
-    ['¿cómo te llamas?','What is your name?','[wot iz yor neim]','Para preguntar el nombre'],
-    ['buenos días','Good morning','[gud mór-ning]','Saludo de la mañana'],
+/* var so it is always globally accessible, IIFE so norm() is in scope */
+var TR_DICT=(function(){
+  /* [spanish, english, pronunciation, note] */
+  var ES=[
+    /* Greetings */
+    ['hola','Hello','[é-lo]','Saludo básico'],
+    ['si','Yes','[yes]','Afirmativo — también escrito "sí"'],
+    ['no','No','[no]','Negativo'],
+    ['buenos dias','Good morning','[gud mór-ning]','Saludo de mañana'],
+    ['buenas tardes','Good afternoon','[gud áf-ter-nuun]','Saludo de tarde'],
+    ['buenas noches','Good night','[gud náit]','Saludo/despedida de noche'],
+    ['buenas','Hi / Hello','[jai]','Saludo informal dominicano'],
+    ['como estas','How are you?','[jáu ar yu]','Pregunta informal'],
+    ['como esta usted','How are you?','[jáu ar yu]','Versión formal'],
+    ['bien','Good / Fine','[gud / fáin]','Respuesta positiva'],
+    ['mas o menos','So-so','[so-so]','Ni bien ni mal'],
+    ['adios','Goodbye','[gud-bái]','Despedida'],
+    ['hasta luego','See you later','[sii yu léi-ter]','Despedida informal'],
+    ['hasta manana','See you tomorrow','[sii yu tu-mÓ-ro]','Hasta el día siguiente'],
+    ['mucho gusto','Nice to meet you','[náis tu miit yu]','Al conocer a alguien'],
+    ['igualmente','Likewise','[láik-wáis]','Respuesta a "mucho gusto"'],
+    ['con permiso','Excuse me','[eks-kiúuz mi]','Para pasar o interrumpir'],
+    ['disculpe','Excuse me / Sorry','[eks-kiúuz mi]','Para llamar atención o disculparse'],
+    ['perdon','Pardon / Sorry','[pár-don]','Disculpa'],
+    ['bienvenido','Welcome','[wél-kom]','Al recibir a alguien'],
+    /* Common phrases */
     ['por favor','Please','[pliiz]','Siempre sé educado'],
-    ['gracias','Thank you','[zank yu]','Para agradecer formalmente'],
-    ['de nada','You\'re welcome','[yor wél-kom]','Respuesta al agradecimiento'],
-    ['disculpe','Excuse me','[eks-kiúuz mi]','Para llamar la atención de alguien'],
-    ['lo siento','I\'m sorry','[aim só-ri]','Para disculparte'],
-    ['no sé','I don\'t know','[ai dont nóu]','Cuando no sabes la respuesta'],
-    ['¿habla español?','Do you speak Spanish?','[du yu spiik spá-nish]','Para encontrar a alguien que te entienda'],
-    ['necesito ayuda','I need help','[ai niid jelp]','Para pedir asistencia'],
-    ['¿dónde está...?','Where is...?','[wér iz]','Para preguntar una dirección'],
-    ['llame a la policía','Call the police','[kol de po-líis]','En caso de emergencia'],
-    ['vivo en','I live in','[ai liv in]','Para decir dónde vives'],
-    ['trabajo en','I work at','[ai wérk at]','Para decir dónde trabajas'],
-    ['tengo hambre','I am hungry','[ai am jón-gri]','Cuando quieres comer'],
-    ['tengo sed','I am thirsty','[ai am zérsti]','Cuando quieres tomar'],
-    ['estoy cansado','I am tired','[ai am táierd]','Cuando necesitas descansar'],
-    ['me duele','It hurts / I have pain','[it jérts]','Para explicar un dolor'],
+    ['gracias','Thank you','[zánk yu]','Agradecimiento'],
+    ['muchas gracias','Thank you very much','[zánk yu véri moch]','Agradecimiento enfático'],
+    ['de nada','You\'re welcome','[yur wél-kom]','Respuesta al "gracias"'],
+    ['lo siento','I\'m sorry','[aim só-ri]','Disculpa sincera'],
+    ['no entiendo','I don\'t understand','[ai dont on-der-stand]','Cuando no comprendes'],
+    ['no hablo ingles','I don\'t speak English','[ai dont spiik íng-lish]','Para explicar tu nivel'],
+    ['puede repetir','Can you repeat that?','[kan yu ri-piit dat]','Para pedir que repitan'],
+    ['mas despacio','More slowly','[mor slóu-li]','Habla más lento'],
+    ['como se dice','How do you say','[jáu du yu sei]','Para preguntar traducción'],
+    ['que significa','What does it mean?','[wot doz it miin]','Para preguntar significado'],
+    ['no se','I don\'t know','[ai dont nóu]','Cuando no sabes'],
+    ['claro','Of course / Sure','[ov kors]','Afirmación enfática'],
+    ['tal vez','Maybe / Perhaps','[méi-bi]','Posibilidad'],
+    ['me llamo','My name is','[mai neim iz]','Para presentarte'],
+    ['como te llamas','What is your name?','[wot iz yur neim]','Preguntar nombre'],
+    ['cuantos anos tienes','How old are you?','[jáu old ar yu]','Preguntar edad'],
+    ['tengo','I have','[ai jav]','Posesión'],
+    ['necesito','I need','[ai niid]','Necesidad'],
+    ['quiero','I want','[ai wont]','Deseo'],
+    ['puedo','I can','[ai kan]','Capacidad/permiso'],
+    ['me gustaria','I would like','[ai wud láik]','Petición educada'],
+    /* Numbers */
+    ['uno','One','[won]','Número 1'],
+    ['dos','Two','[tuu]','Número 2'],
+    ['tres','Three','[zrii]','Número 3'],
+    ['cuatro','Four','[for]','Número 4'],
+    ['cinco','Five','[fáiv]','Número 5'],
+    ['seis','Six','[siks]','Número 6'],
+    ['siete','Seven','[séven]','Número 7'],
+    ['ocho','Eight','[eit]','Número 8'],
+    ['nueve','Nine','[náin]','Número 9'],
+    ['diez','Ten','[ten]','Número 10'],
+    ['once','Eleven','[i-léven]','Número 11'],
+    ['doce','Twelve','[twelv]','Número 12'],
+    ['veinte','Twenty','[twénti]','Número 20'],
+    ['treinta','Thirty','[zérti]','Número 30'],
+    ['cien','One hundred','[won jón-dred]','Número 100'],
+    ['mil','One thousand','[won záu-zend]','Número 1000'],
+    /* Days / Time */
+    ['hoy','Today','[tu-déi]','El día presente'],
+    ['manana','Tomorrow','[tu-mÓ-ro]','El día siguiente'],
+    ['ayer','Yesterday','[yés-ter-dei]','El día anterior'],
+    ['ahora','Now','[náu]','En este momento'],
+    ['mas tarde','Later','[léi-ter]','Después'],
+    ['temprano','Early','[ér-li]','Antes de lo usual'],
+    ['tarde','Late','[leit]','Después de lo usual'],
+    ['lunes','Monday','[món-dei]','Día de la semana'],
+    ['martes','Tuesday','[tiúuz-dei]','Día de la semana'],
+    ['miercoles','Wednesday','[wéns-dei]','Día de la semana'],
+    ['jueves','Thursday','[zérs-dei]','Día de la semana'],
+    ['viernes','Friday','[frái-dei]','Día de la semana'],
+    ['sabado','Saturday','[sá-ter-dei]','Fin de semana'],
+    ['domingo','Sunday','[són-dei]','Fin de semana'],
+    ['semana','Week','[wiik]','7 días'],
+    ['mes','Month','[monz]','30 días aprox.'],
+    ['ano','Year','[yíir]','365 días'],
+    ['hora','Hour / Time','[áuer / táim]','Unidad de tiempo'],
+    ['minuto','Minute','[mí-net]','60 segundos'],
+    ['manana por la manana','Tomorrow morning','[tu-mÓ-ro mór-ning]',''],
+    /* Family */
+    ['mama','Mom / Mother','[mom / mó-der]',''],
+    ['papa','Dad / Father','[dad / fá-der]',''],
+    ['madre','Mother','[mó-der]','Formal para mamá'],
+    ['padre','Father','[fá-der]','Formal para papá'],
+    ['hermano','Brother','[bró-der]',''],
+    ['hermana','Sister','[sís-ter]',''],
+    ['hijo','Son','[son]',''],
+    ['hija','Daughter','[dó-ter]',''],
+    ['esposo','Husband','[jós-band]',''],
+    ['esposa','Wife','[wáif]',''],
+    ['abuelo','Grandfather','[grand-fá-der]',''],
+    ['abuela','Grandmother','[grand-mó-der]',''],
+    ['tio','Uncle','[ón-kel]',''],
+    ['tia','Aunt','[ant]',''],
+    ['primo','Cousin','[kó-zen]','Primo o prima'],
+    ['sobrino','Nephew','[néf-yu]',''],
+    ['sobrina','Niece','[niis]',''],
+    ['familia','Family','[fám-li]',''],
+    ['nino','Child / Kid','[cháild / kid]',''],
+    ['bebe','Baby','[béi-bi]',''],
+    ['novio','Boyfriend','[bói-frend]',''],
+    ['novia','Girlfriend','[gérl-frend]',''],
+    ['amigo','Friend','[frend]',''],
+    ['vecino','Neighbor','[néi-bor]',''],
+    /* Body */
+    ['cabeza','Head','[jed]',''],
+    ['cara','Face','[féis]',''],
+    ['ojo','Eye','[ái]',''],
+    ['ojos','Eyes','[áiz]','Plural'],
+    ['nariz','Nose','[nóuz]',''],
+    ['boca','Mouth','[máuz]',''],
+    ['diente','Tooth','[tuuz]',''],
+    ['dientes','Teeth','[tiiz]','Plural'],
+    ['oido','Ear','[íir]',''],
+    ['cuello','Neck','[nek]',''],
+    ['hombro','Shoulder','[shóul-der]',''],
+    ['brazo','Arm','[arm]',''],
+    ['mano','Hand','[jand]',''],
+    ['dedo','Finger','[fín-ger]',''],
+    ['pecho','Chest','[chest]',''],
+    ['espalda','Back','[bak]',''],
+    ['estomago','Stomach','[stó-mak]',''],
+    ['pierna','Leg','[leg]',''],
+    ['rodilla','Knee','[nii]',''],
+    ['pie','Foot','[fut]',''],
+    ['pies','Feet','[fiit]','Plural'],
+    /* Food & Drinks */
+    ['agua','Water','[wó-ter]',''],
+    ['comida','Food','[fuud]',''],
+    ['desayuno','Breakfast','[brek-fast]',''],
+    ['almuerzo','Lunch','[lonch]',''],
+    ['cena','Dinner','[dí-ner]',''],
+    ['pollo','Chicken','[chí-ken]',''],
+    ['carne','Meat','[miit]',''],
+    ['cerdo','Pork','[pork]',''],
+    ['pescado','Fish','[fish]',''],
+    ['arroz','Rice','[ráis]',''],
+    ['habichuela','Bean','[biin]','Palabra típica dominicana'],
+    ['frijol','Bean','[biin]',''],
+    ['pan','Bread','[bred]',''],
+    ['leche','Milk','[milk]',''],
+    ['huevo','Egg','[eg]',''],
+    ['queso','Cheese','[chiiz]',''],
+    ['azucar','Sugar','[shu-ger]',''],
+    ['sal','Salt','[solt]',''],
+    ['aceite','Oil','[oil]',''],
+    ['fruta','Fruit','[fruut]',''],
+    ['verdura','Vegetable','[véy-ta-bol]',''],
+    ['platano','Plantain','[plán-ten]','Muy típico dominicano'],
+    ['mango','Mango','[mán-go]',''],
+    ['cafe','Coffee','[kó-fi]',''],
+    ['jugo','Juice','[yuus]',''],
+    ['refresco','Soda','[só-da]',''],
+    ['cerveza','Beer','[bíir]',''],
+    ['sopa','Soup','[suup]',''],
+    ['ensalada','Salad','[sá-lad]',''],
+    ['sandwich','Sandwich','[sánd-wich]','Igual en los dos idiomas'],
+    ['postre','Dessert','[di-zért]',''],
+    ['mantequilla','Butter','[bó-ter]',''],
+    ['tomate','Tomato','[to-méi-to]',''],
+    ['cebolla','Onion','[ón-yon]',''],
+    ['ajo','Garlic','[gár-lik]',''],
+    /* Health */
+    ['medico','Doctor','[dók-tor]',''],
+    ['doctor','Doctor','[dók-tor]',''],
+    ['enfermero','Nurse','[nérs]',''],
+    ['hospital','Hospital','[jós-pi-tal]',''],
+    ['farmacia','Pharmacy','[fár-ma-si]',''],
+    ['medicina','Medicine','[méd-i-sin]',''],
+    ['pastilla','Pill','[pil]',''],
+    ['dolor','Pain','[pein]',''],
+    ['me duele','It hurts','[it jérts]','Para indicar dolor'],
+    ['enfermo','Sick','[sik]',''],
+    ['fiebre','Fever','[fíi-ver]',''],
+    ['tos','Cough','[kof]',''],
+    ['resfriado','Cold','[kóuld]','Catarro'],
+    ['gripe','Flu','[fluu]',''],
+    ['alergia','Allergy','[á-ler-yi]',''],
+    ['embarazada','Pregnant','[prég-nant]',''],
+    ['sangre','Blood','[blod]',''],
+    ['receta','Prescription','[pri-skrip-shon]',''],
+    ['seguro medico','Health insurance','[jelz in-shú-rans]',''],
+    ['emergencia','Emergency','[i-mér-yen-si]',''],
+    ['llame una ambulancia','Call an ambulance','[kol an ám-byu-lens]','Emergencia'],
+    ['llame a la policia','Call the police','[kol de po-liis]','Emergencia'],
+    ['ayuda','Help','[jelp]',''],
+    /* Work */
+    ['trabajo','Work / Job','[wérk / yob]',''],
+    ['empleo','Job / Employment','[yob / em-plói-ment]',''],
+    ['jefe','Boss','[bos]',''],
+    ['empleado','Employee','[em-plói-ii]',''],
+    ['sueldo','Salary / Pay','[sál-a-ri / pei]',''],
+    ['pago','Payment','[péi-ment]',''],
+    ['hora extra','Overtime','[óu-ver-táim]',''],
+    ['turno','Shift','[shift]',''],
+    ['horario','Schedule','[skéy-ul]',''],
+    ['reunión','Meeting','[míi-ting]',''],
+    ['oficina','Office','[ó-fis]',''],
+    ['fabrica','Factory','[fák-to-ri]',''],
+    ['tienda','Store / Shop','[stor / shop]',''],
+    ['restaurante','Restaurant','[rés-to-rant]',''],
+    ['contrato','Contract','[kón-trakt]',''],
+    ['entrevista','Interview','[ín-ter-vyu]',''],
+    ['solicitud','Application','[ap-li-kéi-shon]',''],
+    ['referencias','References','[réf-er-en-ses]',''],
+    ['descansó','Day off','[dei of]','Día libre'],
+    ['vacaciones','Vacation','[vei-kéi-shon]',''],
+    ['descanso','Break','[breik]','Pausa en el trabajo'],
+    /* Home */
+    ['casa','House / Home','[jáus / jóum]',''],
+    ['apartamento','Apartment','[a-párt-ment]',''],
+    ['cuarto','Room','[ruum]',''],
+    ['bano','Bathroom','[báz-rum]',''],
+    ['cocina','Kitchen','[kí-chen]',''],
+    ['sala','Living room','[líving ruum]',''],
+    ['puerta','Door','[dor]',''],
+    ['ventana','Window','[wín-do]',''],
+    ['llave','Key','[kii]',''],
+    ['alquiler','Rent','[rent]',''],
+    ['dueno','Landlord','[lánd-lord]',''],
+    ['electricidad','Electricity','[i-lek-trí-si-ti]',''],
+    ['agua corriente','Running water','[rón-ing wó-ter]',''],
+    ['basura','Trash / Garbage','[trash / gár-bich]',''],
+    ['limpiar','To clean','[tu kliin]',''],
+    ['frío','Cold','[kóuld]','Temperatura baja'],
+    ['caliente','Hot','[jot]','Temperatura alta'],
+    /* Transport */
+    ['carro','Car','[kar]','Palabra dominicana para automóvil'],
+    ['coche','Car','[kar]',''],
+    ['autobus','Bus','[bos]',''],
+    ['guagua','Bus','[bos]','Palabra dominicana para autobús'],
+    ['tren','Train','[trein]',''],
+    ['avion','Airplane','[éir-plein]',''],
+    ['taxi','Taxi','[ták-si]',''],
+    ['bicicleta','Bicycle','[bái-si-kel]',''],
+    ['gasolina','Gas / Gasoline','[gas]',''],
+    ['semaforo','Traffic light','[tráf-ik láit]',''],
+    ['parada','Bus stop','[bos stop]',''],
+    ['aeropuerto','Airport','[éir-port]',''],
+    ['licencia','License','[lái-sens]',''],
+    ['accidente','Accident','[ák-si-dent]',''],
+    /* Places */
+    ['supermercado','Supermarket','[sú-per-már-ket]',''],
+    ['mercado','Market','[már-ket]',''],
+    ['banco','Bank','[bank]',''],
+    ['escuela','School','[skuul]',''],
+    ['colegio','School','[skuul]',''],
+    ['universidad','University','[yu-ni-vér-si-ti]',''],
+    ['iglesia','Church','[chérch]',''],
+    ['parque','Park','[park]',''],
+    ['hospital','Hospital','[jós-pi-tal]',''],
+    ['correo','Post office','[póust ó-fis]',''],
+    ['policia','Police','[po-liis]',''],
+    ['bomberos','Fire department','[fáir di-párt-ment]',''],
+    ['biblioteca','Library','[lái-brer-i]',''],
+    ['corte','Court','[kort]','Tribunal'],
+    ['embajada','Embassy','[ém-ba-si]',''],
+    /* Shopping */
+    ['cuanto cuesta','How much is it?','[jáu moch iz it]','Precio'],
+    ['cuanto es','How much?','[jáu moch]','Precio corto'],
+    ['caro','Expensive','[eks-pén-siv]',''],
+    ['barato','Cheap','[chiip]',''],
+    ['descuento','Discount','[dís-kaunt]',''],
+    ['recibo','Receipt','[ri-siit]',''],
+    ['efectivo','Cash','[kash]',''],
+    ['tarjeta','Card','[kard]','Tarjeta de crédito/débito'],
+    ['cambio','Change','[cheinch]','Vuelto/sencillo'],
+    ['talla','Size','[sáiz]','Ropa'],
+    ['color','Color','[kó-lor]',''],
+    ['marca','Brand','[brand]',''],
+    ['precio','Price','[práis]',''],
+    /* Colors */
+    ['rojo','Red','[red]',''],
+    ['azul','Blue','[bluu]',''],
+    ['verde','Green','[griin]',''],
+    ['amarillo','Yellow','[yé-lo]',''],
+    ['negro','Black','[blak]',''],
+    ['blanco','White','[wáit]',''],
+    ['gris','Gray','[grei]',''],
+    ['naranja','Orange','[ó-ranch]',''],
+    ['morado','Purple','[pér-pol]',''],
+    ['rosa','Pink','[pink]',''],
+    ['marron','Brown','[bráun]',''],
+    /* Adjectives */
+    ['grande','Big / Large','[big / larch]',''],
+    ['pequeno','Small / Little','[smol / lí-tel]',''],
+    ['alto','Tall','[tol]',''],
+    ['bajo','Short','[short]',''],
+    ['gordo','Fat','[fat]',''],
+    ['delgado','Thin / Slim','[zin / slim]',''],
+    ['bonito','Beautiful / Pretty','[biú-ti-ful / prí-ti]',''],
+    ['feo','Ugly','[óg-li]',''],
+    ['nuevo','New','[nyu]',''],
+    ['viejo','Old','[óuld]',''],
+    ['rapido','Fast / Quick','[fast / kwik]',''],
+    ['lento','Slow','[slóu]',''],
+    ['facil','Easy','[íi-si]',''],
+    ['dificil','Difficult / Hard','[dí-fi-kolt]',''],
+    ['mucho','A lot / Many','[a lot / mén-i]',''],
+    ['poco','A little / Few','[a lí-tel / fyu]',''],
+    ['todo','All / Everything','[ol / év-ri-zing]',''],
+    ['nada','Nothing','[nó-zing]',''],
+    ['mismo','Same','[seim]',''],
+    ['diferente','Different','[díf-rent]',''],
+    ['importante','Important','[im-pór-tant]',''],
+    ['necesario','Necessary','[né-se-ser-i]',''],
+    ['libre','Free','[frii]','Libre de costo o libertad'],
+    ['ocupado','Busy','[bí-si]',''],
+    ['abierto','Open','[óu-pen]',''],
+    ['cerrado','Closed','[klóuzd]',''],
+    ['lleno','Full','[ful]',''],
+    ['vacio','Empty','[émp-ti]',''],
+    /* Common verbs */
+    ['comer','To eat','[tu iit]',''],
+    ['beber','To drink','[tu drink]',''],
+    ['tomar','To drink / To take','[tu drink / tu teik]',''],
+    ['dormir','To sleep','[tu sliip]',''],
+    ['trabajar','To work','[tu wérk]',''],
+    ['estudiar','To study','[tu stó-di]',''],
+    ['hablar','To speak / To talk','[tu spiik / tu tok]',''],
+    ['escuchar','To listen','[tu lí-sen]',''],
+    ['ver','To see / To watch','[tu sii / tu woch]',''],
+    ['ir','To go','[tu góu]',''],
+    ['venir','To come','[tu kom]',''],
+    ['llegar','To arrive','[tu a-ráiv]',''],
+    ['salir','To leave','[tu liiv]',''],
+    ['comprar','To buy','[tu bái]',''],
+    ['pagar','To pay','[tu péi]',''],
+    ['vivir','To live','[tu liv]',''],
+    ['llamar','To call','[tu kol]',''],
+    ['esperar','To wait / To hope','[tu weit / tu jóup]',''],
+    ['ayudar','To help','[tu jelp]',''],
+    ['entender','To understand','[tu on-der-stand]',''],
+    ['aprender','To learn','[tu lérn]',''],
+    ['ensenar','To teach','[tu tiich]',''],
+    ['leer','To read','[tu riid]',''],
+    ['escribir','To write','[tu ráit]',''],
+    ['abrir','To open','[tu óu-pen]',''],
+    ['cerrar','To close','[tu klóuz]',''],
+    ['buscar','To look for','[tu luk for]',''],
+    ['encontrar','To find','[tu fáind]',''],
+    ['traer','To bring','[tu bring]',''],
+    ['llevar','To take / To carry','[tu teik / tu kér-i]',''],
+    ['poner','To put','[tu put]',''],
+    ['dar','To give','[tu giv]',''],
+    ['tener','To have','[tu jav]',''],
+    ['hacer','To do / To make','[tu duu / tu meik]',''],
+    ['poder','To be able / Can','[tu bi éi-bol / kan]',''],
+    ['querer','To want','[tu wont]',''],
+    ['saber','To know','[tu nóu]',''],
+    ['pensar','To think','[tu zink]',''],
+    ['creer','To believe','[tu bi-liiv]',''],
+    ['sentir','To feel','[tu fiil]',''],
+    ['gustar','To like','[tu láik]',''],
+    ['necesitar','To need','[tu niid]',''],
+    ['comenzar','To start','[tu start]',''],
+    ['terminar','To finish','[tu fí-nish]',''],
+    ['regresar','To return','[tu ri-térn]',''],
+    ['preguntar','To ask','[tu ask]',''],
+    ['responder','To answer','[tu án-ser]',''],
+    ['caminar','To walk','[tu wok]',''],
+    ['correr','To run','[tu ron]',''],
+    ['mandar','To send','[tu send]',''],
+    /* Immigration / Legal */
+    ['ciudadano','Citizen','[sí-ti-zen]',''],
+    ['residencia','Residence','[réz-i-dens]',''],
+    ['pasaporte','Passport','[pás-port]',''],
+    ['visa','Visa','[víi-za]',''],
+    ['permiso','Permit','[pér-mit]',''],
+    ['identificacion','ID / Identification','[ai-dii]',''],
+    ['seguro social','Social security','[sóu-shal si-kiú-ri-ti]',''],
+    ['inmigracion','Immigration','[im-i-gréi-shon]',''],
+    ['abogado','Lawyer','[ló-yer]',''],
+    ['traductor','Translator','[trans-léi-tor]',''],
+    ['intérprete','Interpreter','[in-tér-pri-ter]',''],
+    ['firma','Signature','[síg-na-cher]',''],
+    ['formulario','Form','[form]','Documento a llenar'],
+    ['solicitante','Applicant','[á-pli-kant]',''],
+    /* Directions */
+    ['derecha','Right','[ráit]',''],
+    ['izquierda','Left','[left]',''],
+    ['recto','Straight','[streit]',''],
+    ['arriba','Up','[op]',''],
+    ['abajo','Down','[dáun]',''],
+    ['cerca','Near / Close','[níir / klóus]',''],
+    ['lejos','Far','[far]',''],
+    ['aqui','Here','[jíir]',''],
+    ['alla','There','[der]',''],
+    ['norte','North','[norz]',''],
+    ['sur','South','[sáuz]',''],
+    ['este','East','[iist]',''],
+    ['oeste','West','[west]',''],
+    ['esquina','Corner','[kór-ner]',''],
+    ['calle','Street','[striit]',''],
+    ['avenida','Avenue','[á-ve-niu]',''],
+    ['direccion','Address','[a-drés]',''],
+    ['mapa','Map','[map]',''],
+    ['cruce','Crosswalk','[krós-wok]',''],
+    ['cuadra','Block','[blok]',''],
+    /* Technology */
+    ['telefono','Phone','[fóun]',''],
+    ['celular','Cell phone','[sel fóun]',''],
+    ['computadora','Computer','[com-piú-ter]',''],
+    ['internet','Internet','[ín-ter-net]','Igual en ambos'],
+    ['correo electronico','Email','[íi-meil]',''],
+    ['contrasena','Password','[pás-werd]',''],
+    ['aplicacion','App','[ap]',''],
+    ['mensaje','Message','[mé-sach]',''],
+    /* DR-specific */
+    ['vaina','Thing / Situation','[zing]','Expresión dominicana'],
+    ['pana','Friend / Buddy','[frend]','Expresión dominicana'],
+    ['chévere','Cool / Great','[kuul]','Expresión caribeña'],
+    ['bacano','Cool / Awesome','[kuul]','Expresión dominicana'],
+    ['chin','A little bit','[a lí-tel bit]','Pequeña cantidad en RD'],
+    ['quisqueya','Quisqueya (Dominican Republic)','[dom-í-ni-kan ri-pób-lik]','Nombre indígena de RD'],
+    ['mangú','Mashed plantain dish','[masht plán-ten dish]','Plato típico dominicano'],
   ];
-  extras_esEn.forEach(([es,en,pron,note])=>{
-    esEn[norm(es)]={tr:en,pron,note,emoji:'💬'};
-  });
-  const extras_enEs=[
-    ['how much','¿Cuánto cuesta?','[jáu moch]','Para preguntar el precio'],
-    ['i don\'t understand','No entiendo','[ai dont on-der-stand]',''],
-    ['where is','¿Dónde está...?','[wér iz]','Para pedir direcciones'],
-    ['my name is','Me llamo...','[mai neim iz]','Para presentarte'],
-    ['please','Por favor','[pliiz]','Siempre úsalo al pedir algo'],
-    ['thank you','Gracias','[zank yu]','Agradecimiento'],
-    ['you\'re welcome','De nada','[yor wél-kom]','Respuesta al "thank you"'],
-    ['excuse me','Disculpe / Perdón','[eks-kiúuz mi]','Para llamar la atención'],
-    ['i\'m sorry','Lo siento','[aim só-ri]','Para pedir disculpas'],
-    ['i need help','Necesito ayuda','[ai niid jelp]','Para pedir asistencia'],
-    ['call the police','Llame a la policía','[kol de po-líis]','Emergencia'],
-    ['i am hungry','Tengo hambre','[ai am jón-gri]',''],
-    ['i am tired','Estoy cansado/a','[ai am táierd]',''],
-    ['it hurts','Me duele','[it jérts]','Dolor'],
-    ['good morning','Buenos días','[gud mór-ning]','Saludo matutino'],
-    ['good night','Buenas noches','[gud náit]','Despedida nocturna'],
-  ];
-  extras_enEs.forEach(([en,es,pron,note])=>{
-    enEs[norm(en)]={tr:es,pron,note,emoji:'💬'};
-  });
-  return{esEn,enEs};
-}
 
-let TR_DIR='es-en';
-const TR_QUICK_ES=['Hola','Gracias','Agua','Trabajo','Casa','Familia','Dinero','Ayuda','Por favor','Médico','Sí','No','Carro','Baño','Comer'];
-const TR_QUICK_EN=['Hello','Work','Money','Please','Family','Doctor','Food','Help','Yes','No','Car','Bathroom','Buy','Eat','Sorry'];
+  /* EN→ES: just invert the table */
+  var esEn={}, enEs={};
+  ES.forEach(function(row){
+    var es=row[0], en=row[1], pron=row[2], note=row[3];
+    var esKey=norm(es);
+    var entry={tr:en, pron:pron, note:note};
+    esEn[esKey]=entry;
+    /* Also index without leading articles: "to eat" → "eat" */
+    var enNorm=norm(en);
+    enEs[enNorm]={tr:es.charAt(0).toUpperCase()+es.slice(1), pron:pron, note:note};
+    /* Index slash variants on both sides */
+    en.split('/').forEach(function(v){
+      var k=norm(v);
+      if(k && !enEs[k]) enEs[k]={tr:es.charAt(0).toUpperCase()+es.slice(1),pron:pron,note:note};
+    });
+    /* Strip "to " prefix for English verb lookups */
+    if(enNorm.indexOf('to '===0)) {
+      var bare=enNorm.slice(3);
+      if(bare && !enEs[bare]) enEs[bare]={tr:es.charAt(0).toUpperCase()+es.slice(1),pron:pron,note:note};
+    }
+  });
+  return {esEn:esEn, enEs:enEs};
+})();
 
-/* Wire up translator UI via addEventListener (required for GitHub Pages CSP) */
+var TR_DIR='es-en';
+var TR_QUICK_ES=['Hola','Sí','No','Gracias','Por favor','Lo siento','Agua','Trabajo','Casa','Familia','Carro','Baño','Médico','Ayuda','No entiendo','Cuánto cuesta'];
+var TR_QUICK_EN=['Hello','Yes','No','Thank you','Please','Sorry','Water','Work','Home','Family','Car','Bathroom','Doctor','Help','I don\'t understand','How much'];
+
+/* Wire up translator UI via addEventListener (no inline handlers — required for GitHub Pages) */
 document.addEventListener('DOMContentLoaded',function(){
-  const inp=document.getElementById('tr-input');
-  const clrBtn=document.getElementById('tr-clear-btn');
-  const goBtn=document.getElementById('tr-go-btn');
-  const btnEs=document.getElementById('tr-btn-es');
-  const btnEn=document.getElementById('tr-btn-en');
-  const swapBtn=document.querySelector('.tr-swap');
+  var inp=document.getElementById('tr-input');
+  var clrBtn=document.getElementById('tr-clear-btn');
+  var goBtn=document.getElementById('tr-go-btn');
+  var btnEs=document.getElementById('tr-btn-es');
+  var btnEn=document.getElementById('tr-btn-en');
+  var swapBtn=document.querySelector('.tr-swap');
   if(inp){
     inp.addEventListener('input',function(){
-      clrBtn.style.display=inp.value.trim()?'inline-flex':'none';
+      if(clrBtn) clrBtn.style.display=inp.value.trim()?'inline-flex':'none';
     });
     inp.addEventListener('keydown',function(e){
       if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doTranslate();}
@@ -1106,17 +1484,17 @@ document.addEventListener('DOMContentLoaded',function(){
   if(btnEs)  btnEs.addEventListener('click',function(){setTrDir('es-en');});
   if(btnEn)  btnEn.addEventListener('click',function(){setTrDir('en-es');});
   if(swapBtn)swapBtn.addEventListener('click',swapTrDir);
+  renderTrChips();
 });
 
-function renderTranslate(){
-  renderTrChips();
-}
+function renderTranslate(){renderTrChips();}
 function renderTrChips(){
-  const chips=TR_DIR==='es-en'?TR_QUICK_ES:TR_QUICK_EN;
-  const grid=document.getElementById('tr-quick-chips');
+  var chips=TR_DIR==='es-en'?TR_QUICK_ES:TR_QUICK_EN;
+  var grid=document.getElementById('tr-quick-chips');
+  if(!grid)return;
   grid.innerHTML='';
-  chips.forEach(w=>{
-    const chip=document.createElement('span');
+  chips.forEach(function(w){
+    var chip=document.createElement('span');
     chip.className='tr-chip';
     chip.textContent=w;
     chip.addEventListener('click',function(){trChip(w);});
@@ -1125,56 +1503,71 @@ function renderTrChips(){
 }
 function setTrDir(dir){
   TR_DIR=dir;
-  document.getElementById('tr-btn-es').classList.toggle('active',dir==='es-en');
-  document.getElementById('tr-btn-en').classList.toggle('active',dir==='en-es');
-  document.getElementById('tr-input').value='';
-  document.getElementById('tr-result').classList.remove('show');
-  document.getElementById('tr-clear-btn').style.display='none';
-  const inp=document.getElementById('tr-input');
-  inp.placeholder=dir==='es-en'?'Escribe en español...':'Type in English...';
+  var btnEs=document.getElementById('tr-btn-es');
+  var btnEn=document.getElementById('tr-btn-en');
+  var inp=document.getElementById('tr-input');
+  var clrBtn=document.getElementById('tr-clear-btn');
+  if(btnEs) btnEs.classList.toggle('active',dir==='es-en');
+  if(btnEn) btnEn.classList.toggle('active',dir==='en-es');
+  if(inp){
+    inp.value='';
+    inp.placeholder=dir==='es-en'?'Escribe en español...':'Type in English...';
+  }
+  var resBox=document.getElementById('tr-result');
+  if(resBox) resBox.classList.remove('show');
+  if(clrBtn) clrBtn.style.display='none';
   renderTrChips();
 }
 function swapTrDir(){setTrDir(TR_DIR==='es-en'?'en-es':'es-en');}
 function clearTr(){
-  document.getElementById('tr-input').value='';
-  document.getElementById('tr-clear-btn').style.display='none';
-  document.getElementById('tr-result').classList.remove('show');
+  var inp=document.getElementById('tr-input');
+  var clrBtn=document.getElementById('tr-clear-btn');
+  var resBox=document.getElementById('tr-result');
+  if(inp) inp.value='';
+  if(clrBtn) clrBtn.style.display='none';
+  if(resBox) resBox.classList.remove('show');
 }
 function trChip(word){
-  document.getElementById('tr-input').value=word;
-  document.getElementById('tr-clear-btn').style.display='inline-flex';
+  var inp=document.getElementById('tr-input');
+  var clrBtn=document.getElementById('tr-clear-btn');
+  if(inp) inp.value=word;
+  if(clrBtn) clrBtn.style.display='inline-flex';
   doTranslate();
 }
 function doTranslate(){
-  const raw=document.getElementById('tr-input').value.trim();
-  if(!raw)return;
-  const key=norm(raw);
-  const dict=TR_DIR==='es-en'?TR_DICT.esEn:TR_DICT.enEs;
-  const fromLang=TR_DIR==='es-en'?'🇩🇴 Español':'🇺🇸 English';
-  const toLang=TR_DIR==='es-en'?'🇺🇸 English':'🇩🇴 Español';
-  const resBox=document.getElementById('tr-result');
-  const noRes=document.getElementById('tr-no-result');
-  document.getElementById('tr-result-label').textContent=fromLang+' → '+toLang;
-
-  // Exact normalized match only — no fuzzy/partial (causes wrong results)
-  const found=dict[key];
-
-  resBox.classList.add('show');
+  var inp=document.getElementById('tr-input');
+  if(!inp) return;
+  var raw=inp.value.trim();
+  if(!raw) return;
+  var key=norm(raw);
+  var dict=TR_DIR==='es-en'?TR_DICT.esEn:TR_DICT.enEs;
+  var fromLang=TR_DIR==='es-en'?'🇩🇴 Español':'🇺🇸 English';
+  var toLang  =TR_DIR==='es-en'?'🇺🇸 English':'🇩🇴 Español';
+  var resBox  =document.getElementById('tr-result');
+  var noRes   =document.getElementById('tr-no-result');
+  var lblEl   =document.getElementById('tr-result-label');
+  var txtEl   =document.getElementById('tr-result-text');
+  var pronEl  =document.getElementById('tr-result-pron');
+  var noteEl  =document.getElementById('tr-result-note');
+  if(lblEl) lblEl.textContent=fromLang+' → '+toLang;
+  var found=dict[key];
+  if(resBox) resBox.classList.add('show');
   if(found){
-    noRes.style.display='none';
-    document.getElementById('tr-result-text').textContent=(found.emoji?found.emoji+' ':'')+found.tr;
-    document.getElementById('tr-result-pron').textContent=found.pron?'🔊 '+found.pron:'';
-    const noteEl=document.getElementById('tr-result-note');
-    noteEl.textContent=found.note||'';
-    noteEl.style.display=found.note?'block':'none';
+    if(noRes) noRes.style.display='none';
+    if(txtEl) txtEl.textContent=found.tr;
+    if(pronEl) pronEl.textContent=found.pron?'🔊 '+found.pron:'';
+    if(noteEl){noteEl.textContent=found.note||'';noteEl.style.display=found.note?'block':'none';}
   } else {
-    document.getElementById('tr-result-text').textContent='';
-    document.getElementById('tr-result-pron').textContent='';
-    document.getElementById('tr-result-note').style.display='none';
-    noRes.style.display='block';
-    noRes.textContent='No encontré "'+raw+'". Prueba con palabras simples como "agua", "trabajo" o "sí".';
+    if(txtEl) txtEl.textContent='';
+    if(pronEl) pronEl.textContent='';
+    if(noteEl) noteEl.style.display='none';
+    if(noRes){
+      noRes.style.display='block';
+      noRes.textContent='No encontré "'+raw+'". Intenta una palabra como "agua", "trabajo", o "gracias".';
+    }
   }
 }
+
 
 /* ── Service Worker ── */
 if('serviceWorker' in navigator){
